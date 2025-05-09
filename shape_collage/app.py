@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request, send_file
 from PIL import Image, ImageDraw
 import os
+import time
+import cv2
+import mediapipe as mp
 import numpy as np
 import random
 import math
@@ -9,7 +12,7 @@ app = Flask(__name__)
 
 UPLOAD_FOLDER = "static/uploads"
 OUTPUT_FILE = "static/collage.png"
-MAX_CANVAS_SIZE = 5000  
+CANVAS_SIZE = 1000, 1000
 MARGIN = 5  
 
 if not os.path.exists(UPLOAD_FOLDER):
@@ -86,18 +89,18 @@ def fill_square_with_images(images, canvas_size):
         img_idx += 1
     return canvas
 
-def creat_rectangle_mask(collage):
+def create_rectangle_mask(collage):
     mask = Image.new("L", collage.size, 255)
     return mask
 
-def creat_circle_mask(collage):
+def create_circle_mask(collage):
     """Apply a circular mask to make the image circular."""
     mask = Image.new("L", collage.size, 0)
     draw = ImageDraw.Draw(mask)
     draw.ellipse([(0, 0), collage.size], fill=255)
     return mask
 
-def creat_star_mask(collage):
+def create_star_mask(collage):
     mask = Image.new('L', collage.size, 0)
     draw = ImageDraw.Draw(mask)
 
@@ -114,7 +117,7 @@ def creat_star_mask(collage):
     draw.polygon(points, fill=255)
     return mask
 
-def creat_heart_mask(collage):
+def create_heart_mask(collage):
     width, height = collage.size
     mask = Image.new('L', collage.size, 0)
     draw = ImageDraw.Draw(mask)
@@ -135,6 +138,33 @@ def creat_heart_mask(collage):
     draw.polygon(points, fill=255)
     return mask
 
+def create_silhouette_mask(image_path="static/uploads/target.png"):   # 直接抓位置
+    img = cv2.imread(image_path)
+    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    if img is None:
+        raise FileNotFoundError(f"讀不到圖片喔：{image_path}")
+
+    with mp.solutions.selfie_segmentation.SelfieSegmentation(model_selection=1) as segment:
+        result = segment.process(img_rgb)
+        mask = result.segmentation_mask
+    
+    binary_mask = (mask > 0.5).astype(np.uint8) * 255
+
+    # 自適應模糊大小
+    h, w = img.shape[:2]
+    kernel_size = max(7, int(min(w, h) * 0.07) // 2 * 2 + 1)  # 5% 模糊比例
+    # 高斯模糊平滑邊緣
+    blurred_mask = cv2.GaussianBlur(binary_mask, (kernel_size, kernel_size), 0)
+    # blurred_mask = cv2.GaussianBlur(binary_mask, (13, 13), 0)
+
+    # 再次閾值化，讓邊緣變得乾淨
+    smooth_mask = (blurred_mask > 127).astype(np.uint8) * 255
+
+    # 轉成 PIL Image
+    mask = Image.fromarray(smooth_mask).resize(CANVAS_SIZE).convert("L")
+    mask.save("debug.png")
+    return mask
+
 def apply_mask(collage, mask, main_image):
     result = collage.copy()
     result.paste(main_image, place_main_image_in_mask(mask, main_image))
@@ -152,6 +182,7 @@ def place_main_image_in_mask(canvas, main_image):
         # 判斷這個位置是否在遮罩內
         if is_within_mask(x, y, canvas, main_image.size):
             return x, y
+    print("??")
 
 # 判斷是否在遮罩內
 def is_within_mask(x, y, mask_image, tile_size):
@@ -177,7 +208,10 @@ def index():
 def upload():
     shape = request.form.get("shape")
 
-    # 清空舊檔
+    # 清空舊拼貼圖
+    if os.path.exists(OUTPUT_FILE):
+        os.remove(OUTPUT_FILE)
+    # 清空舊上傳圖
     for file in os.listdir(UPLOAD_FOLDER):
         os.remove(os.path.join(UPLOAD_FOLDER, file))
 
@@ -191,19 +225,20 @@ def upload():
         saved_files.append(filename)
 
     # 載入圖片
-    loaded_images = load_images()[1]
-    main_image = load_images()[0]
+    main_image, loaded_images = load_images()
 
     # 產生拼貼圖
-    collage = fill_square_with_images(loaded_images, canvas_size=(1000, 1000))
+    collage = fill_square_with_images(loaded_images, canvas_size=CANVAS_SIZE)
     if shape == "rectangle":
-        mask = creat_rectangle_mask(collage)
+        mask = create_rectangle_mask(collage)
     elif shape == "circle":
-        mask = creat_circle_mask(collage)
+        mask = create_circle_mask(collage)
     elif shape == "star":
-        mask = creat_star_mask(collage)
+        mask = create_star_mask(collage)
     elif shape == "heart":
-        mask = creat_heart_mask(collage)
+        mask = create_heart_mask(collage)
+    elif shape == "silhouette":
+        mask = create_silhouette_mask()
     else:
         return "Invalid shape", 400
     collage = apply_mask(collage, mask, main_image)
@@ -223,12 +258,16 @@ def upload():
                 "is_target": "target" in file.lower()  # 假設檔名中包含 "target" 的圖片是目標圖
             })
 
+        collage_url = f"/{OUTPUT_FILE}?t={int(time.time())}"  # 加上當前時間戳
+
         return {
             "images": image_positions,
-            "collage_url": f"/{OUTPUT_FILE}"
+            "collage_url": collage_url
         }
 
     return "No images found!", 400
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+# 處理未上傳圖片狀況
