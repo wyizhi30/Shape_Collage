@@ -119,6 +119,7 @@
           <option value="star">星形</option>
           <option value="heart">心形</option>
           <option value="silhouette">輪廓</option>
+          <option value="draw">手繪</option>
         </select>
       </div>
 
@@ -130,6 +131,11 @@
       <button type="submit">上傳並生成拼貼圖</button>
     </form>
 
+    <div id="drawArea" style="display:none; margin-top: 20px;">
+      <label>在下方手繪你的形狀：</label>
+      <canvas id="drawCanvas" width="500" height="500" style="border:1px solid #ccc;"></canvas>
+    </div>
+
     <div id="collageArea">
       <div class="preview-grid" id="previewGrid"></div>
       <img id="collageImage" class="collage-img" style="display: none;" />
@@ -137,45 +143,108 @@
   </main>
 
   <script>
-    document.getElementById("uploadForm").addEventListener("submit", function(event) {
-      event.preventDefault();
+  const shapeSelect = document.getElementById("shape");
+  const drawArea = document.getElementById("drawArea");
+  const canvas = document.getElementById("drawCanvas");
+  const ctx = canvas?.getContext("2d");
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  // 🔥 把事件註冊拉出來
+  shapeSelect.addEventListener("change", function () {
+    if (this.value === "draw") {
+      drawArea.style.display = "block";
+    } else {
+      drawArea.style.display = "none";
+    }
+  });
 
-      const formData = new FormData(this);
+  let drawing = false;
+  let lastX = 0;
+  let lastY = 0;
+  let brushSize = 40;
 
-      fetch("/upload", {
-        method: "POST",
-        body: formData
-      })
-      .then(response => response.json())
-      .then(data => {
-        const grid = document.getElementById("previewGrid");
-        const collageImg = document.getElementById("collageImage");
-        grid.innerHTML = "";
+  if (canvas) {
+    canvas.addEventListener("mousedown", (e) => {
+      drawing = true;
+      [lastX, lastY] = [e.offsetX, e.offsetY];
+    });
 
-        // 顯示小圖片
-        data.images.forEach(file => {
-          const img = document.createElement("img");
-          img.src = file.url;
-          img.alt = file.name;
-          img.setAttribute("data-target", file.is_target ? "true" : "false");
+    canvas.addEventListener("mousemove", draw);
+    canvas.addEventListener("mouseup", () => drawing = false);
+    canvas.addEventListener("mouseout", () => drawing = false);
 
-          img.addEventListener("click", () => {
-            if (img.getAttribute("data-target") === "true") {
-              alert("🎯 找到了！");
-            } else {
-              alert("❌ 不是目標，再試一次");
-            }
-          });
+    function draw(e) {
+      if (!drawing) return;
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = brushSize;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(e.offsetX, e.offsetY);
+      ctx.stroke();
+      [lastX, lastY] = [e.offsetX, e.offsetY];
+    }
+  }
 
-          grid.appendChild(img);
+  document.getElementById("uploadForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+    const formData = new FormData(this);
+
+    // 如果選的是 "draw"，把 canvas 畫的圖轉成 blob 丟進 formData
+    if (shapeSelect.value === "draw" && canvas) {
+      const dataUrl = canvas.toDataURL("image/png");
+      const blob = dataURLToBlob(dataUrl);
+      console.log(blob); // 看有沒有東西，type 是不是 image/png
+      formData.append("drawn_shape", blob, "drawn_shape.png");
+    }
+    
+
+    fetch("/upload", {
+      method: "POST",
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      const grid = document.getElementById("previewGrid");
+      const collageImg = document.getElementById("collageImage");
+      grid.innerHTML = "";
+
+      data.images.forEach(file => {
+        const img = document.createElement("img");
+        img.src = file.url;
+        img.alt = file.name;
+        img.setAttribute("data-target", file.is_target ? "true" : "false");
+
+        img.addEventListener("click", () => {
+          if (img.getAttribute("data-target") === "true") {
+            alert("🎯 找到了！");
+          } else {
+            alert("❌ 不是目標，再試一次");
+          }
         });
 
-        // 顯示大圖
-        collageImg.src = data.collage_url;
-        collageImg.style.display = "block";
-      })
-      .catch(error => console.error("Error:", error));
-    });
-  </script>
+        grid.appendChild(img);
+      });
+
+      collageImg.src = data.collage_url;
+      collageImg.style.display = "block";
+    })
+    .catch(error => console.error("Error:", error));
+  });
+
+  function dataURLToBlob(dataURL) {
+    const byteString = atob(dataURL.split(',')[1]);
+    const mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    return new Blob([ab], { type: mimeString });
+  }
+
+</script>
+
 </body>
 </html>

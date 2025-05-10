@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, send_file
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageOps
 import os
 import time
 import cv2
@@ -227,6 +227,9 @@ def upload():
     # 載入圖片
     main_image, loaded_images = load_images()
 
+    # 嘗試取得手繪圖形
+    drawn_shape = request.files.get("drawn_shape")
+
     # 產生拼貼圖
     collage = fill_square_with_images(loaded_images, canvas_size=CANVAS_SIZE)
     if shape == "rectangle":
@@ -239,6 +242,11 @@ def upload():
         mask = create_heart_mask(collage)
     elif shape == "silhouette":
         mask = create_silhouette_mask()
+    elif shape == "draw":
+        if drawn_shape:
+            mask = ImageOps.invert(Image.open(drawn_shape).convert("L")).resize(CANVAS_SIZE)
+        else:
+            return "Missing drawn_shape", 400
     else:
         return "Invalid shape", 400
     collage = apply_mask(collage, mask, main_image)
