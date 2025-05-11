@@ -162,7 +162,6 @@ def create_silhouette_mask(image_path="static/uploads/target.png"):   # 直接�
 
     # 轉成 PIL Image
     mask = Image.fromarray(smooth_mask).resize(CANVAS_SIZE).convert("L")
-    mask.save("debug.png")
     return mask
 
 def apply_mask(collage, mask, main_image):
@@ -182,7 +181,7 @@ def place_main_image_in_mask(canvas, main_image):
         # 判斷這個位置是否在遮罩內
         if is_within_mask(x, y, canvas, main_image.size):
             return x, y
-    print("??")
+    print("主圖不在範圍內!")
 
 # 判斷是否在遮罩內
 def is_within_mask(x, y, mask_image, tile_size):
@@ -191,7 +190,8 @@ def is_within_mask(x, y, mask_image, tile_size):
         (x, y),
         (x + img_w - 1, y),
         (x, y + img_h - 1),
-        (x + img_w - 1, y + img_h - 1)
+        (x + img_w - 1, y + img_h - 1),
+        (x + img_w // 2, y + img_h // 2) # 中心
     ]
     for cx, cy in corners:
         if cx >= mask_image.width or cy >= mask_image.height:
@@ -278,4 +278,4 @@ def upload():
 if __name__ == "__main__":
     app.run(debug=True)
 
-# 處理未上傳圖片狀況
+# 整理一下程式碼

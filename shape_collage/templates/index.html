@@ -132,9 +132,13 @@
     </form>
 
     <div id="drawArea" style="display:none; margin-top: 20px;">
-      <label>在下方手繪你的形狀：</label>
-      <canvas id="drawCanvas" width="500" height="500" style="border:1px solid #ccc;"></canvas>
+      <div style="display: flex; flex-direction: column; align-items: center;">
+        <label style="align-self: flex-start; margin-bottom: 8px;">在下方手繪你的形狀：</label>
+        <canvas id="drawCanvas" width="500" height="500" style="border:1px solid #ccc;"></canvas>
+        <button id="clearCanvasBtn" type="button" style="margin-top: 10px;">清除畫布</button>
+      </div>
     </div>
+
 
     <div id="collageArea">
       <div class="preview-grid" id="previewGrid"></div>
@@ -244,6 +248,13 @@
     return new Blob([ab], { type: mimeString });
   }
 
+  document.getElementById("clearCanvasBtn").addEventListener("click", () => {
+    if (ctx && canvas) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "white";
+      ctx.fillRect(0, 0, canvas.width, canvas.height); // 背景補白
+    }
+  });
 </script>
 
 </body>
