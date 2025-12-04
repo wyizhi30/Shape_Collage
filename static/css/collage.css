@@ -1,0 +1,358 @@
+/* 拼貼製作頁面樣式 */
+
+/* 表單區塊 */
+#uploadForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    background: #F6F5F2;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(176,139,99,0.13), 0 2px 8px rgba(140,130,115,0.08);
+    padding: 32px 36px 18px 36px;
+    min-width: 340px;
+    max-width: 420px;
+}
+
+.shape-radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 18px;
+    margin-bottom: 10px;
+}
+
+.shape-radio-group label {
+    color: #8C8273;
+    font-size: 1rem;
+    margin-right: 8px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+}
+
+/* 輸入框 */
+.main-input {
+    padding: 10px 14px;
+    font-size: 1.05rem;
+    border: 1.5px solid #EAC89A;
+    border-radius: 8px;
+    margin-bottom: 18px;
+    outline: none;
+    background: #fff;
+    color: #555555;
+    box-shadow: 0 1px 4px rgba(140,130,115,0.06);
+    width: 240px;
+    transition: border-color 0.2s;
+}
+
+.main-input:focus { 
+    border-color: #D6B075; 
+}
+
+/* 結果顯示區 */
+.display-box {
+    margin-top: 18px;
+    padding: 12px 18px;
+    min-width: 240px;
+    min-height: 36px;
+    background: #F6F5F2;
+    color: #555555;
+    border: 1.5px solid #EAC89A;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(140,130,115,0.08);
+    font-size: 1.05rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.05em;
+}
+
+/* 拼貼畫布區塊 - 使用 clamp() 線性縮放 */
+#canvas-box {
+    position: relative;
+    width: clamp(300px, 43vw, 800px);
+    aspect-ratio: 1;  /* ✅ 使用 aspect-ratio 確保正方形 */
+    background: #eac99a70;
+    border: 2px solid #e1bb827b;
+    margin: 20px 20px 20px 20px;
+    overflow: visible;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(176,139,99,0.08);
+}
+
+/* 🔥 拼貼照片 - 確保在畫布內且支援百分比定位 */
+#canvas-box .photo {
+    position: absolute;
+    cursor: pointer;
+    z-index: 1;
+    transition: transform .3s cubic-bezier(.4,0,.2,1);
+    transform-origin: center;
+    transform: rotate(var(--angle,0deg));
+    border-radius: 5px;
+    box-shadow: 0 1px 6px rgba(140,130,115,0.10);
+    border: 2px solid #ffffff;
+}
+
+#canvas-box .photo.enlarged {
+    transform: scale(2) rotate(var(--angle,0deg));
+    z-index: 999;
+    box-shadow: 0 8px 32px rgba(176,139,99,0.18);
+}
+
+/* 手繪遮罩區 - 使用 clamp() 線性縮放 */
+#drawArea { 
+    display: none; 
+    margin: 12px auto; 
+    width: clamp(300px, 50vw, 800px);
+    text-align: center; 
+}
+
+#drawCanvas {
+    border: 2px solid #EAC89A;
+    background: #fff;
+    cursor: crosshair;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    width: 100%;
+    aspect-ratio: 1;
+}
+
+/* 手機優化 */
+@media (max-width: 480px) {
+    #canvas-box {
+        width: clamp(280px, 85vw, 400px);
+        margin: 10px auto 0 auto;
+    }
+
+    #drawArea {
+        width: clamp(280px, 95vw, 400px);
+    }
+    
+    #uploadForm {
+        min-width: 0;
+        max-width: 95vw;
+        padding: 16px 4vw 12px 4vw;
+    }
+}
+
+/* ✅ 手繪提示區域樣式 */
+#drawHint {
+    padding: 16px;
+    background: linear-gradient(135deg, #f8f9ff 0%, #f0f4f8 100%);
+    border-radius: 12px;
+    border: 2px dashed #EAC89A;
+    text-align: center;
+}
+
+.draw-hint-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+/* ✅ 手繪 Modal 樣式 */
+.draw-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1050;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    animation: drawModalFadeIn 0.3s ease-out;
+}
+
+.draw-modal.show {
+    display: flex;
+}
+
+.draw-modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+}
+
+.draw-modal-content {
+    position: relative;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    padding: 32px;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    z-index: 1051;
+    border: 3px solid #EAC89A;
+    animation: drawModalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.draw-modal-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.draw-modal-header h4 {
+    color: #2c3e50;
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+}
+
+.draw-modal-header p {
+    color: #6c757d;
+    margin-bottom: 0;
+    font-size: 1rem;
+}
+
+.draw-canvas-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+    position: relative;
+}
+
+#drawCanvas {
+    border: 3px solid #EAC89A;
+    border-radius: 16px;
+    cursor: crosshair;
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    max-width: 100%;
+    height: auto;
+}
+
+#drawCanvas:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+}
+
+.draw-modal-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.draw-modal-controls .btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+    color: white;
+}
+
+.draw-modal-controls .btn-success:hover {
+    background: linear-gradient(135deg, #218838 0%, #1ea085 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(40, 167, 69, 0.3);
+}
+
+.draw-tips {
+    text-align: center;
+    background: rgba(234, 200, 154, 0.15);
+    border-radius: 8px;
+    padding: 12px 16px;
+    border-left: 4px solid #EAC89A;
+}
+
+#drawPreviewContainer {
+    margin-top: 10px;
+    text-align: center;
+}
+
+#drawPreview {
+    border: 1px solid #EAC89A;
+    border-radius: 6px;
+}
+
+/* 截圖按鈕樣式 */
+#screenshotBtn {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border: none;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    transition: all 0.3s ease;
+}
+
+#screenshotBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    transition: all 0.2s ease;
+}
+
+#screenshotBtn:active {
+    transform: translateY(0);
+}
+
+#screenshotBtn:disabled {
+    background: #6c757d;
+    box-shadow: none;
+    transform: none;
+    cursor: not-allowed;
+}
+
+/* 成功提示動畫 */
+.alert.position-fixed {
+    animation: slideInRight 0.5s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* ✅ Modal 動畫 */
+@keyframes drawModalFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes drawModalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* ✅ 響應式調整 */
+@media (max-width: 768px) {
+    .draw-modal-content {
+        padding: 20px;
+        max-width: 95vw;
+    }
+    
+    #drawCanvas {
+        width: 100%;
+        max-width: 400px;
+        height: auto;
+    }
+    
+    .draw-modal-controls {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .draw-modal-controls .btn {
+        width: 200px;
+    }
+}

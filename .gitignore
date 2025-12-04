@@ -1,0 +1,6 @@
+.env
+__pycache__/
+instance/
+static/uploads/*
+static/generated_images/*
+static/carousel/*

@@ -1,0 +1,60 @@
+/* 主內容區和版面布局 */
+.center-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: calc(100vh - 80px);
+    padding-top: 32px;
+}
+
+/* Section 樣式 */
+.content-section {
+    min-height: 500px;
+    padding: 20px 0;
+}
+
+/* 載入中樣式 */
+#loading {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 999;
+    background: rgba(234,200,154, 0.85);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#loading .loader {
+    border: 8px solid rgba(255, 255, 255, 0.2);
+    border-top: 8px solid #EAC89A;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin { 
+    0% { transform: rotate(0deg); } 
+    100% { transform: rotate(360deg); } 
+}
+
+/* 響應式設計 */
+@media (max-width: 600px) {
+    .photo-card, .gallery {
+        width: 100%;
+        max-width: 98vw;
+    }
+    .photo-card img, .main-img {
+        width: 100%;
+        height: auto;
+        max-width: 100%;
+    }
+    .btn-group {
+        flex-direction: column;
+        gap: 12px;
+    }
+}

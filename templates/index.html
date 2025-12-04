@@ -1,0 +1,141 @@
+{% extends "layout.html" %}
+
+{% block title %}拼貼首頁 - 拼貼系統{% endblock %}
+
+{% block content %}
+<main class="container my-5">
+
+  <!-- hero 區塊 -->
+  <section class="hero mb-4" aria-labelledby="hero-title">
+    <div class="row align-items-center">
+      <div class="col-md-6 mb-4 mb-md-0">
+        <div class="ratio ratio-4x3" style="max-width:600px; margin:auto;">
+          <div id="mainGalleryCarousel" class="carousel slide h-100" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+              {% for url in image_urls %}
+              <button type="button" data-bs-target="#mainGalleryCarousel" data-bs-slide-to="{{ loop.index0 }}"
+                      {% if loop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ loop.index }}">
+              </button>
+              {% endfor %}
+            </div>
+            <div class="carousel-inner h-100">
+              {% for url in image_urls %}
+              <div class="carousel-item {% if loop.first %}active{% endif %} h-100" data-bs-interval="4000">
+                <img src="{{ url }}" class="d-block w-100 h-100 object-fit-cover rounded" alt="拼貼圖">
+              </div>
+              {% endfor %}
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#mainGalleryCarousel" data-bs-slide="prev">
+              <span class="custom-arrow" aria-hidden="true">
+                <svg fill="currentColor" viewBox="0 0 16 16"><path d="M10 2 L6 8 L10 14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+              <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#mainGalleryCarousel" data-bs-slide="next">
+              <span class="custom-arrow" aria-hidden="true">
+                <svg fill="currentColor" viewBox="0 0 16 16"><path d="M6 2 L10 8 L6 14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+              <span class="visually-hidden">Next</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 d-flex flex-column justify-content-center align-items-center gallery-info">
+        <div class="mb-4">
+          <!-- h2 加 id 供 section aria-labelledby 使用 -->
+          <h2 id="hero-title" class="mb-3 display-5 fw-bold">拼貼 × 探索 × 創造</h2>
+          <p class="fs-5">在影像的層次之間，找尋屬於你的驚喜!</p>
+        </div>
+        <a href="collage.html" class="btn btn-outline-primary btn-lg px-5 py-3 mx-auto">GO!</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 系統特色 -->
+  <section class="mb-5" aria-labelledby="features-title">
+    <div class="container">
+      <h3 id="features-title" class="mb-4 text-center">系統特色</h3>
+      <div class="row text-center">
+        <div class="col-md-4 mb-4 mb-md-0">
+          <div class="p-4 border rounded shadow-sm h-100">
+            <svg width="48" height="48" fill="currentColor" viewBox="0 0 16 16" class="mb-3">
+              <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="2" fill="none"/>
+              <path d="M4 8h8" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <h5 class="fw-bold mb-2">互動遊戲</h5>
+            <p class="text-muted">快來找找自己藏在哪裡，每張小圖都藏著驚喜，玩出拼貼的樂趣！</p>
+          </div>
+        </div>
+        <div class="col-md-4 mb-4 mb-md-0">
+          <div class="p-4 border rounded shadow-sm h-100">
+            <svg width="48" height="48" fill="currentColor" viewBox="0 0 16 16" class="mb-3">
+              <rect x="3" y="3" width="10" height="10" stroke="currentColor" stroke-width="2" fill="none"/>
+              <path d="M8 3v10" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <h5 class="fw-bold mb-2">多樣拼貼</h5>
+            <p class="text-muted">支援多樣拼貼版型,一鍵輕鬆生成,展現你的獨特視覺風格。</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-4 border rounded shadow-sm h-100">
+            <svg width="48" height="48" fill="currentColor" viewBox="0 0 16 16" class="mb-3">
+              <polygon points="8,2 14,14 2,14" stroke="currentColor" stroke-width="2" fill="none"/>
+              <path d="M8 2v12" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <h5 class="fw-bold mb-2">分享樂趣</h5>
+            <p class="text-muted">分享拼貼與朋友同樂,在展示區發現更多創意靈感。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 操作說明 -->
+  <section class="mb-5" aria-labelledby="howto-title">
+    <div class="container">
+      <h3 id="howto-title" class="mb-3 text-center">操作說明</h3>
+
+      <div class="row g-3 justify-content-center">
+        <div class="col-6 col-sm-4 col-md-3">
+          <div class="p-3 border rounded text-center h-100">
+            <div class="mb-2 display-6">1</div>
+            <h6 class="mb-1">上傳照片</h6>
+            <p class="small text-muted mb-0">選擇主圖（檔名含 <code>TARGET</code>）與其他素材。</p>
+          </div>
+        </div>
+
+        <div class="col-6 col-sm-4 col-md-3">
+          <div class="p-3 border rounded text-center h-100">
+            <div class="mb-2 display-6">2</div>
+            <h6 class="mb-1">選擇形狀</h6>
+            <p class="small text-muted mb-0">方形、圓形、文字或手繪遮罩，彈性選擇。</p>
+          </div>
+        </div>
+
+        <div class="col-6 col-sm-4 col-md-3">
+          <div class="p-3 border rounded text-center h-100">
+            <div class="mb-2 display-6">3</div>
+            <h6 class="mb-1">產生拼貼</h6>
+            <p class="small text-muted mb-0">按下「產生拼貼」，稍候系統進行生成並回傳結果。</p>
+          </div>
+        </div>
+
+        <div class="col-6 col-sm-4 col-md-3">
+          <div class="p-3 border rounded text-center h-100">
+            <div class="mb-2 display-6">4</div>
+            <h6 class="mb-1">下載或分享</h6>
+            <p class="small text-muted mb-0">生成後可下載、分享或在展示區查看作品。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center mt-4">
+        <a href="collage.html" class="btn btn-primary btn-lg px-4" role="button" aria-label="前往產生拼貼頁面">立即開始產生拼貼</a>
+        <p class="small text-muted mt-2 mb-0">建議使用桌機或平板以獲得較佳操作體驗。</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+{% endblock %}

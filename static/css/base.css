@@ -1,0 +1,81 @@
+/* 全域基礎樣式 */
+:root {
+    --navbar-height: 68px;
+}
+
+/* 主體字型與背景 */
+body {
+    margin: 0;
+    font-family: 'Noto Sans TC', Arial, sans-serif;
+    background: #EAE8E4;
+    min-height: 100vh;
+    color: #1E1E1E;
+    letter-spacing: 0.03em;
+}
+
+/* 主按鈕樣式 */
+.main-btn {
+    padding: 15px 44px;
+    font-size: 1.12rem;
+    background: #8C8273;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(140,130,115,0.08);
+    transition: background 0.3s, color 0.3s, box-shadow 0.2s, transform 0.2s;
+    font-family: 'Noto Sans TC', Arial, sans-serif;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+}
+
+.main-btn:hover,
+.main-btn:focus {
+    background: #555555;
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(140,130,115,0.14);
+    transform: translateY(-2px) scale(1.03);
+}
+
+.main-btn.secondary {
+    background: #DDDAD3;
+    color: #1E1E1E;
+}
+
+.main-btn.secondary:hover,
+.main-btn.secondary:focus {
+    background: #8C8273;
+    color: #fff;
+}
+
+.main-btn.success {
+    background: #8C8273;
+    color: #fff;
+}
+
+.main-btn.success:hover,
+.main-btn.success:focus {
+    background: #555555;
+    color: #fff;
+}
+
+/* 按鈕群組 */
+.btn-group {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 22px;
+    margin-top: 18px;
+}
+
+/* 頁尾 footer */
+footer {
+    text-align: center;
+    color: #8C8273;
+    padding: 28px 0 16px 0;
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+    background: transparent;
+    border-top: 1.5px solid #DDDAD3;
+    margin-top: 48px;
+}

@@ -1,0 +1,162 @@
+/* 導航和選單相關樣式 */
+
+/* 主導航條 */
+nav.top-bar {
+    width: 100%;
+    background: linear-gradient(90deg, #fce7c3 0%, #EAC89A 20%, #D6B075 60%, #CCAF6E 100%);
+    box-shadow: 0 4px 24px rgba(176,139,99,0.10), 0 1.5px 4px rgba(0,0,0,0.06);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    backdrop-filter: blur(2px);
+    padding: 0;
+    min-height: 68px;
+}
+
+.navbar .container {
+    padding-left: 40px;
+    padding-right: 40px;
+}
+
+.navbar-brand {
+    font-size: 1.35rem;
+    color: #8C8273 !important;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    font-family: 'Noto Sans TC', Arial, sans-serif;
+    user-select: none;
+    padding: 0 0 0 2px;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.navbar-nav {
+    display: flex;
+    align-items: center; /* 垂直置中 */
+}
+
+.navbar-nav .nav-item {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* 水平置中 li 內的內容 */
+    padding: 0; /* 如需可微調間距 */
+}
+
+.navbar-nav .nav-link {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 12px 16px;
+    margin-left: 0 !important;
+    box-sizing: border-box;
+}
+
+.nav-link.bar-link {
+    margin-left: 36px;
+    font-size: 1.18rem;
+    color: #8C8273 !important;
+    text-decoration: none;
+    background: none;
+    border: none;
+    padding: 0 2px;
+    cursor: pointer;
+    font-weight: 500;
+    font-family: 'Noto Sans TC', Arial, sans-serif;
+    letter-spacing: 0.08em;
+    position: relative;
+    transition: color 0.25s cubic-bezier(.4,0,.2,1);
+}
+
+.nav-link.bar-link::after {
+    content: "";
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -4px;
+    width: 100%;
+    height: 2px;
+    background: #B08B63;
+    transform: scaleX(0);
+    transition: transform 0.3s cubic-bezier(.4,0,.2,1), background 0.2s;
+    border-radius: 1px;
+}
+
+.nav-link.bar-link:hover,
+.nav-link.bar-link:focus {
+    color: #555555 !important;
+    text-decoration: none;
+}
+
+.nav-link.bar-link:hover::after,
+.nav-link.bar-link:focus::after {
+    transform: scaleX(1);
+    background: #555555;
+}
+
+.nav-link.bar-link:active {
+    color: #b06363 !important;
+}
+
+/* Offcanvas 側邊選單樣式 */
+.offcanvas {
+    top: var(--navbar-height);
+    height: calc(100% - var(--navbar-height));
+    border: none;
+    box-shadow: -8px 0 24px rgba(0,0,0,0.06);
+}
+
+.offcanvas.offcanvas-end {
+    width: 70%;
+    max-width: 420px;
+    background: #fce7c3;
+    border-bottom: 0px;
+}
+
+/* 行動裝置微調：保留 70% 行為（不改為 100vw） */
+@media (max-width: 480px) {
+    .offcanvas.offcanvas-end {
+        width: 70%;
+        max-width: none;
+        top: var(--navbar-height);
+        height: calc(100% - var(--navbar-height));
+    }
+}
+
+/* 小按鈕樣式：模擬 btn-close 的簡潔外觀 */
+.offcanvas-back-btn {
+    border: none;
+    background: transparent;
+    padding: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    border-radius: 6px;
+}
+
+/* hover 效果 */
+.offcanvas-back-btn:hover {
+    background-color: rgba(0,0,0,0.04);
+    color: #343a40;
+}
+
+.offcanvas-body .navbar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* 各項目之間的間距 */
+}
+
+/* 增加 nav-link 的可點擊區域與視覺感 */
+.offcanvas-body .nav-link {
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: var(--bs-body-color);
+    transition: background-color .12s ease;
+}
+
+/* 每項間加分隔線 */
+.offcanvas-body .nav-item + .nav-item {
+    border-top: 2px solid rgba(0,0,0,0.04);
+    padding-top: 8px;
+}

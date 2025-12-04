@@ -1,0 +1,76 @@
+/* 回饋表單樣式 */
+
+.feedback-container {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(176, 139, 99, 0.12);
+    padding: 2.5rem;
+}
+
+.feedback-header h2 {
+    color: #434953;
+    font-weight: 700;
+}
+
+.feedback-form .form-label {
+    color: #434953;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.feedback-form .form-control {
+    border: 2px solid #EAC89A;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.feedback-form .form-control:focus {
+    border-color: #D6B075;
+    box-shadow: 0 0 0 0.2rem rgba(234, 200, 154, 0.25);
+}
+
+.feedback-type-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.feedback-type-group .form-check {
+    background: #F6F5F2;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.feedback-type-group .form-check:hover {
+    border-color: #EAC89A;
+}
+
+.feedback-type-group .form-check-input:checked + .form-check-label {
+    color: #D6B075;
+    font-weight: 600;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .feedback-container {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+    
+    .feedback-type-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .rating-group .form-check {
+        padding: 0.4rem 0.8rem;
+    }
+    
+    .contact-info {
+        padding: 1.5rem;
+    }
+}

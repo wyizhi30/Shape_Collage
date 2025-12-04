@@ -1,0 +1,316 @@
+/* ===========================================
+   遊戲區塊樣式 (Game Section Styles)
+   =========================================== */
+
+/* 遊戲區塊標題 */
+.game-title {
+    font-family: 'Montserrat', sans-serif;
+    color: #2b6cb0;
+    font-size: 1.5em;
+    margin: 40px 0 18px 0;
+    text-align: center;
+}
+
+/* 遊戲控制按鈕容器 */
+.game-controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+}
+
+.game-controls button {
+    margin: 0 !important;
+}
+
+/* 遊戲結束模態框 */
+.game-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(44, 62, 80, 0.55);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 模態框內容 */
+.game-modal-content {
+    background: #fff;
+    padding: 36px 32px 28px 32px;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px #2b6cb0aa;
+    min-width: 320px;
+    text-align: center;
+    max-width: 90vw;
+}
+
+/* 模態框標題 */
+.game-modal h2 {
+    color: #2b6cb0;
+    margin-bottom: 10px;
+}
+
+/* 模態框時間顯示 */
+.modal-time {
+    font-size: 1.3em;
+    color: #e53e3e;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+/* 模態框排名顯示 */
+.modal-rank {
+    font-size: 1.1em;
+    color: #2b6cb0;
+    margin-bottom: 18px;
+}
+
+/* 返回按鈕 */
+.back-to-gallery-btn {
+    background: linear-gradient(90deg, #a0aec0 0%, #cbd5e1 100%);
+    color: #222;
+    margin-left: 12px;
+}
+
+/* 遊戲主區域 */
+.game-main-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    margin-top: 20px;
+}
+
+/* 遊戲結果區域 */
+.game-result-area {
+    text-align: center;
+}
+
+.game-result-title {
+    margin-bottom: 8px;
+    color: #2b6cb0;
+}
+
+.targetPhoto {
+    display: none;
+    max-width: 150px;
+    max-height: 150px;
+    width: auto;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+}
+
+/* 遊戲統計區域 */
+.game-stats-area {
+    min-width: 180px;
+}
+
+/* 計時器容器 */
+.timer-container {
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+.timer-label {
+    font-size: 1.3em;
+    color: #4299e1;
+    font-weight: 600;
+}
+
+.timer-value {
+    font-size: 1.3em;
+    color: #e53e3e;
+    font-weight: 700;
+}
+
+/* 排行榜容器 */
+.leaderboard-container {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px #4299e1aa;
+    padding: 10px;
+}
+
+.leaderboard-title {
+    font-size: 1.1em;
+    color: #2b6cb0;
+    font-weight: 600;
+    margin-bottom: 6px;
+    text-align: center;
+}
+
+.leaderboard-list {
+    padding-left: 18px;
+    margin: 0;
+    font-size: 1em;
+    color: #222;
+}
+
+/* 倒數計時覆蓋層 */
+.countdown-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1500;
+}
+
+.countdown-number {
+    font-size: 4em;
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* 提示按鈕覆蓋層 */
+.hint-button-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.hint-overlay-svg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.hint-button-wrapper.cooling .hint-btn {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Wally 提示箭頭 */
+.wally-arrow {
+    position: absolute;
+    height: 6px;
+    background: linear-gradient(90deg, #f6ad55, #fbd38d);
+    border-radius: 3px;
+    transform-origin: left center;
+    z-index: 10;
+    animation: pulseArrow 0.8s ease-in-out;
+}
+
+.wally-arrow-head {
+    position: absolute;
+    right: -8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 12px solid #f6ad55;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+}
+
+@keyframes pulseArrow {
+    0%, 100% { opacity: 0.8; transform: rotate(var(--angle, 0deg)) scale(1); }
+    50% { opacity: 1; transform: rotate(var(--angle, 0deg)) scale(1.1); }
+}
+
+/* Wally 提示高亮 */
+.wally-hint-highlight {
+    animation: wallyHighlight 1.4s ease-in-out;
+}
+
+@keyframes wallyHighlight {
+    0%, 100% { box-shadow: none; }
+    25%, 75% { box-shadow: 0 0 20px #f6ad55, 0 0 40px #f6ad55aa; }
+    50% { box-shadow: 0 0 30px #f6ad55, 0 0 60px #f6ad55aa; }
+}
+
+/* 🎯 拼貼遊戲主畫布 */
+#game-canvas-box {
+    position: relative;
+    display: block;
+    width: clamp(300px, 40vw, 800px);
+    aspect-ratio: 1;
+    margin: 20px auto;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    background: #eac99a70;
+    overflow: visible;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 🖼️ 拼貼圖片樣式 */
+#game-canvas-box .photo {
+    position: absolute;
+    cursor: pointer;
+    border-radius: 5px;
+    object-fit: cover;
+    border: 2px solid #ffffff;
+    transform: rotate(var(--angle, 0deg));
+    transition: all 0.2s ease;
+}
+
+#game-canvas-box .photo:hover {
+    transform: rotate(var(--angle, 0deg)) scale(2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 5;
+}
+
+#statusMsg {
+    display: none;
+    position: fixed;     /* 固定在螢幕上 */
+    top: 20px;           /* 距離頂部 */
+    left: 50%;           /* 水平置中 */
+    transform: translateX(-50%);
+    background: #ffffff7b;
+    color: #000;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 1rem;
+    opacity: 0;
+    pointer-events: none; /* 不會擋住點擊 */
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 9999;
+}
+#statusMsg.show {
+    display: block;
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* 手機版優化 (768px以下) */
+@media (max-width: 768px) {
+    #game-canvas-box {
+        width: clamp(260px, 85vw, 350px);
+        margin: 10px auto;
+    }
+
+    .game-controls .btn {
+        font-size: 0.85rem;
+        padding: 6px 12px;
+    }
+
+    /* 統計區改為垂直排列 */
+    .col-12.col-lg-3 {
+        display: block !important;
+        margin-top: 1rem;
+    }
+    
+    .timer-container {
+        margin-bottom: 1rem !important;
+        padding: 0.75rem !important;
+    }
+    
+    .leaderboard-container {
+        padding: 0.75rem !important;
+    }
+}

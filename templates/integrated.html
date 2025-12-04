@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>拼貼系統 - 整合頁面</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/navigation.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/homepage.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/collage.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/gallery.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/feedback.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-md bg-white top-bar">
+        <div class="container">
+            <a class="navbar-brand fw-bold navbar-title" href="#section-home" onclick="showSection('home', event); return false;">拼貼系統</a>
+
+            <button class="navbar-toggler" type="button"
+                    data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar"
+                    aria-controls="offcanvasSidebar" aria-label="切換選單">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link bar-link" href="#section-collage" onclick="showSection('collage', event); return false;">拼貼產生</a></li>
+                    <li class="nav-item"><a class="nav-link bar-link" href="#section-gallery" onclick="showSection('gallery', event); return false;">照片展示</a></li>
+                    <li class="nav-item"><a class="nav-link bar-link" href="#section-game" onclick="showSection('game', event); return false;">遊戲</a></li>
+                    <li class="nav-item"><a class="nav-link bar-link" href="#section-feedback" onclick="showSection('feedback', event); return false;">聯絡我們</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasSidebar" aria-labelledby="offcanvasSidebarLabel">
+        <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasSidebarLabel">選單</h5>
+        <button type="button" class="offcanvas-back-btn" data-bs-dismiss="offcanvas" aria-label="返回">
+            <svg width="28" height="28" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M5 3.5 L10.5 8 L5 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        </div>
+        <div class="offcanvas-body">
+            <ul class="navbar-nav offcanvas-nav w-100">
+                <li class="nav-item"><a class="nav-link bar-link offcanvas-link px-3 py-2" data-bs-dismiss="offcanvas" href="#section-collage" onclick="showSection('collage', event); return false;">拼貼產生</a></li>
+                <li class="nav-item"><a class="nav-link bar-link offcanvas-link px-3 py-2" data-bs-dismiss="offcanvas" href="#section-gallery" onclick="showSection('gallery', event); return false;">照片展示</a></li>
+                <li class="nav-item"><a class="nav-link bar-link offcanvas-link px-3 py-2" data-bs-dismiss="offcanvas" href="#section-game" onclick="showSection('game', event); return false;">遊戲</a></li>
+                <li class="nav-item"><a class="nav-link bar-link offcanvas-link px-3 py-2" data-bs-dismiss="offcanvas" href="#section-feedback" onclick="showSection('feedback', event); return false;">聯絡我們</a></li>
+            </ul>
+        </div>
+    </div>
+
+  <main id="mainContent">
+    <!-- 首頁介紹 Section -->
+    <section id="section-home" class="content-section">
+        <!-- hero 區塊 -->
+        <section class="hero mb-4" aria-labelledby="hero-title">
+        <div class="row align-items-center">
+            <div class="col-md-6 mb-4 mb-md-0">
+            <div class="ratio ratio-1x1" style="max-width:600px; margin:auto;background-color:#eac99aff;">
+                <div id="mainGalleryCarousel" class="carousel slide h-100" data-bs-ride="carousel">
+                <div class="carousel-indicators">
+                    {% for url in image_urls %}
+                    <button type="button" data-bs-target="#mainGalleryCarousel" data-bs-slide-to="{{ loop.index0 }}"
+                            {% if loop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ loop.index }}">
+                    </button>
+                    {% endfor %}
+                </div>
+                <div class="carousel-inner h-100">
+                    {% for url in image_urls %}
+                    <div class="carousel-item {% if loop.first %}active{% endif %} h-100" data-bs-interval="4000">
+                    <img src="{{ url }}" class="d-block w-100 h-100 object-fit-contain rounded" alt="拼貼圖">
+                    </div>
+                    {% endfor %}
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#mainGalleryCarousel" data-bs-slide="prev">
+                    <span class="custom-arrow" aria-hidden="true">
+                    <svg fill="currentColor" viewBox="0 0 16 16"><path d="M10 2 L6 8 L10 14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#mainGalleryCarousel" data-bs-slide="next">
+                    <span class="custom-arrow" aria-hidden="true">
+                    <svg fill="currentColor" viewBox="0 0 16 16"><path d="M6 2 L10 8 L6 14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+                </div>
+            </div>
+            </div>
+
+            <div class="col-md-6 d-flex flex-column justify-content-center align-items-center gallery-info">
+            <div class="mb-4">
+                <!-- h2 加 id 供 section aria-labelledby 使用 -->
+                <h2 id="hero-title" class="mb-3 display-5 fw-bold">拼貼 × 探索 × 創造</h2>
+                <p class="fs-5">在影像的層次之間，找尋屬於你的驚喜!</p>
+            </div>
+            <a href="#section-collage" class="btn btn-outline-primary btn-lg px-5 py-3 mx-auto" onclick="showSection('collage', event); return false;">GO!</a>
+            </div>
+        </div>
+        </section>
+
+        <!-- 系統特色 -->
+        <section class="mb-5" aria-labelledby="features-title">
+        <div class="container">
+            <h3 id="features-title" class="mb-4 text-center">系統特色</h3>
+            <div class="row text-center">
+            <div class="col-md-4 mb-4 mb-md-0">
+                <div class="p-4 border rounded shadow-sm h-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-search feature-icon" viewBox="0 0 16 16">
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                    </svg>
+                    <h5 class="fw-bold mb-2">互動遊戲</h5>
+                    <p class="text-muted">快來找找自己藏在哪裡，每張小圖都藏著驚喜，玩出拼貼的樂趣！</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4 mb-md-0">
+                <div class="p-4 border rounded shadow-sm h-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-columns-gap feature-icon" viewBox="0 0 16 16">
+                        <path d="M6 1v3H1V1zM1 0a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1V1a1 1 0 0 0-1-1zm14 12v3h-5v-3zm-5-1a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1zM6 8v7H1V8zM1 7a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1zm14-6v7h-5V1zm-5-1a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1V1a1 1 0 0 0-1-1z"/>
+                    </svg>
+                    <h5 class="fw-bold mb-2">多樣拼貼</h5>
+                    <p class="text-muted">支援多樣拼貼版型,一鍵輕鬆生成,展現你的獨特視覺風格。</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-4 border rounded shadow-sm h-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-share feature-icon" viewBox="0 0 16 16">
+                        <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5m-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3"/>
+                    </svg>
+                    <h5 class="fw-bold mb-2">分享樂趣</h5>
+                    <p class="text-muted">分享拼貼與朋友同樂,在展示區發現更多創意靈感。</p>
+                </div>
+            </div>
+            </div>
+        </div>
+        </section>
+
+        <!-- 操作說明 -->
+        <section class="mb-5" aria-labelledby="howto-title">
+        <div class="container">
+            <h3 id="howto-title" class="mb-3 text-center">操作說明</h3>
+
+            <div class="row g-3 justify-content-center">
+            <div class="col-6 col-sm-4 col-md-3">
+                <div class="p-3 border rounded text-center h-100">
+                <div class="mb-2 display-6">1</div>
+                <h6 class="mb-1">上傳照片</h6>
+                <p class="small text-muted mb-0">選擇想上傳的照片。</p>
+                </div>
+            </div>
+
+            <div class="col-6 col-sm-4 col-md-3">
+                <div class="p-3 border rounded text-center h-100">
+                <div class="mb-2 display-6">2</div>
+                <h6 class="mb-1">選擇形狀</h6>
+                <p class="small text-muted mb-0">方形、圓形、星形、愛心、文字遮罩或創意手繪。</p>
+                </div>
+            </div>
+
+            <div class="col-6 col-sm-4 col-md-3">
+                <div class="p-3 border rounded text-center h-100">
+                <div class="mb-2 display-6">3</div>
+                <h6 class="mb-1">產生拼貼</h6>
+                <p class="small text-muted mb-0">點擊「產生拼貼」，AI 生成約需 1-2 分鐘。。</p>
+                </div>
+            </div>
+
+            <div class="col-6 col-sm-4 col-md-3">
+                <div class="p-3 border rounded text-center h-100">
+                <div class="mb-2 display-6">4</div>
+                <h6 class="mb-1">下載或分享</h6>
+                <p class="small text-muted mb-0">生成後可下載、分享或在展示區查看作品。</p>
+                </div>
+            </div>
+            </div>
+
+            <div class="text-center mt-4">
+            <a href="#section-collage" class="btn btn-primary btn-lg px-4" role="button" aria-label="前往產生拼貼頁面" onclick="showSection('collage', event); return false;">立即開始產生拼貼</a>
+            <p class="small text-muted mt-2 mb-0">建議使用桌機或平板以獲得較佳操作體驗。</p>
+            </div>
+        </div>
+        </section>
+    </section>
+
+    <!-- 拼貼製作 Section -->
+    <section id="section-collage" class="content-section" style="display: none;">
+        <div class="container my-4">
+            <div class="justify-content-center">
+                <div style="display:flex; flex-direction:column; align-items:center; gap:20px;">
+                    <form method="POST" action="/generate_collage" enctype="multipart/form-data" id="uploadForm" style="display:flex; flex-direction:column; align-items:center; gap:8px; background:#fff; border-radius:12px; box-shadow:0 1px 8px rgba(0,0,0,0.08); padding:28px 32px 18px 32px;">
+                        <!-- 形狀選擇 -->
+                        <div class="shape-radio-group">
+                            <label><input type="radio" name="shape" value="rectangle" checked> 正方形</label>
+                            <label><input type="radio" name="shape" value="circle"> 圓形</label>
+                            <label><input type="radio" name="shape" value="star"> 星形</label>
+                            <label><input type="radio" name="shape" value="heart"> 愛心</label>
+                            <label><input type="radio" name="shape" value="text_mask"> 文字</label>
+                            <input type="text" name="text_input" id="textInput" class="main-input" placeholder="輸入文字" style="display:none;">
+                            <label><input type="radio" name="shape" value="custom_silhouette"> 自訂圖片輪廓</label>
+                            <label><input type="radio" name="shape" value="draw"> 手繪</label>
+                        </div>
+
+                        <!-- 上傳照片 -->
+                        <input type="file" name="images" multiple required class="main-input">
+
+                        <!-- 自訂遮罩上傳區 -->
+                        <div id="customMaskUpload" style="display:none;">
+                            <label style="color:#23272f;">上傳自訂輪廓圖：</label>
+                            <input type="file" name="mask_image" accept="image/*" class="main-input">
+                        </div>
+
+                        <!-- ✅ 手繪提示區域 -->
+                        <div id="drawHint" style="display:none;">
+                            <div class="draw-hint-box">
+                                <p style="color:#8C8273; margin:2px 0; text-align:center;">
+                                    點擊下方按鈕開始手繪你的創意形狀
+                                </p>
+                                <div id="drawPreviewContainer">
+                                    <canvas id="drawPreview" width="100" height="100"></canvas>
+                                </div>
+                                <button type="button" id="openDrawModalBtn" class="main-btn" style="background:#EAC89A; color:#555;">
+                                    開啟畫布
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="main-btn" style="margin-top:10px;">產生拼貼</button>
+                        <div class="display-box" id="collageResult">等待產生...</div>
+                    </form>
+
+                    <!-- 拼貼預覽 -->
+                    <div id="screenshotWrapper" style="position: relative; display: inline-block;">
+                        <div id="canvas-box"></div>
+                    </div>
+
+                    <div id="saveConfirmBox" style="display:none; margin-top:10px;">
+                        <span>💾 是否要將拼貼作品存到資料庫？</span>
+                        <div style="margin-top:8px;">
+                            <button id="saveCollageBtn" class="btn btn-success">儲存</button>
+                            <button id="cancelSaveBtn" class="btn btn-secondary">取消</button>
+                        </div>
+                    </div>
+
+                    <!-- 下載區域 -->
+                    <div id="downloadSection" style="display: none;">
+                        <div class="d-flex justify-content-center gap-3">
+                            <button id="screenshotBtn" class="btn btn-success btn-lg px-4" onclick="ScreenshotModule.captureAndDownload()">
+                                ⬇️ 下載
+                            </button>
+                            <button id="playGameBtn" class="btn btn-primary btn-lg px-4" onclick="startGameWithCurrentCollage()" style="display: none;">
+                                🎮 開始遊戲
+                            </button>
+                        </div>
+                        <p class="text-center text-muted mt-2 mb-0">
+                            <small>將以 PNG 格式下載到您的下載資料夾</small>
+                        </p>
+                    </div>
+                </div>
+                <!-- ✅ 手繪畫布彈出視窗 Modal -->
+                <div id="drawModal" class="draw-modal">
+                    <div class="draw-modal-backdrop"></div>
+                    <div class="draw-modal-content">
+                        <div class="draw-modal-header">
+                            <div>
+                                <h4 class="d-flex justify-content-center align-items-center mb-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-brush me-2" viewBox="0 0 16 16">
+                                        <path d="M15.825.12a.5.5 0 0 1 .132.584c-1.53 3.43-4.743 8.17-7.095 10.64a6.1 6.1 0 0 1-2.373 1.534c-.018.227-.06.538-.16.868-.201.659-.667 1.479-1.708 1.74a8.1 8.1 0 0 1-3.078.132 4 4 0 0 1-.562-.135 1.4 1.4 0 0 1-.466-.247.7.7 0 0 1-.204-.288.62.62 0 0 1 .004-.443c.095-.245.316-.38.461-.452.394-.197.625-.453.867-.826.095-.144.184-.297.287-.472l.117-.198c.151-.255.326-.54.546-.848.528-.739 1.201-.925 1.746-.896q.19.012.348.048c.062-.172.142-.38.238-.608.261-.619.658-1.419 1.187-2.069 2.176-2.67 6.18-6.206 9.117-8.104a.5.5 0 0 1 .596.04M4.705 11.912a1.2 1.2 0 0 0-.419-.1c-.246-.013-.573.05-.879.479-.197.275-.355.532-.5.777l-.105.177c-.106.181-.213.362-.32.528a3.4 3.4 0 0 1-.76.861c.69.112 1.736.111 2.657-.12.559-.139.843-.569.993-1.06a3 3 0 0 0 .126-.75zm1.44.026c.12-.04.277-.1.458-.183a5.1 5.1 0 0 0 1.535-1.1c1.9-1.996 4.412-5.57 6.052-8.631-2.59 1.927-5.566 4.66-7.302 6.792-.442.543-.795 1.243-1.042 1.826-.121.288-.214.54-.275.72v.001l.575.575zm-4.973 3.04.007-.005zm3.582-3.043.002.001h-.002z"/>
+                                    </svg>
+                                    創意手繪工作區
+                                </h4>
+                                <p class="mb-0">盡情發揮你的創意，繪製獨特的拼貼形狀</p>
+                            </div>
+                        </div>
+                        
+                        <div class="draw-canvas-container">
+                            <canvas id="drawCanvas" width="600" height="600"></canvas>
+                        </div>
+                        
+                        <div class="draw-modal-controls">
+                            <button type="button" id="clearCanvasBtn" class="btn btn-outline-secondary d-flex align-items-center">
+                                <!-- <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                                </svg> -->
+                                🗑️ 清除畫布
+                            </button>
+                            <button type="button" id="finishDrawBtn" class="btn btn-success">
+                                ✅ 完成繪製
+                            </button>
+                        </div>
+                        
+                        <div class="draw-tips">
+                            <small class="text-muted">
+                                💡 提示：在白色區域繪製黑色線條，繪製的區域將顯示拼貼圖片
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 照片展示 Section -->
+    <section id="section-gallery" class="content-section" style="display: none;">
+        <div class="container my-5">
+            <h2 class="mb-4 text-center fw-bold" style="color:#434953;">資料庫照片展示</h2>
+
+            <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div id="grid" class="grid" aria-live="polite" aria-busy="false">
+                <div class="grid-sizer"></div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 遊戲 Section -->
+    <section id="section-game" class="content-section" style="display: none;">
+        <div class="container my-5">
+            <div class="row justify-content-center">
+                <div class="col-md-12">
+                    <div id="gameArea" class="game-container">
+                        <!-- Game Over/Win Modal -->
+                        <div id="gameOverModal" class="game-modal">
+                            <div class="game-modal-content bg-white rounded shadow-lg p-4">
+                                <h2 class="text-center mb-3">🎉 Game Over！</h2>
+                                <div id="modalTime" class="text-center mb-2 fs-5"></div>
+                                <div id="modalRank" class="text-center mb-4 text-muted"></div>
+                                <div class="text-center">
+                                    <button id="playAgainBtn" class="btn btn-primary me-3">再玩一次</button>
+                                    <button id="backBtn" class="btn btn-outline-secondary">返回</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 遊戲主要區域 -->
+                        <div class="row g-4">
+                            <!-- 左側：遊戲結果區 -->
+                            <div class="col-12 col-md-9">
+                                <div class="game-result-area bg-white rounded shadow-sm p-4">
+                                    <h3 class="mb-3 text-center" style="color:#434953;">找找看拼貼中的目標！</h3>
+                                    <div id="game-canvas-box" class="position-relative">
+                                        <!-- 遊戲拼貼圖片將在此顯示 -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 右側：統計區 - 添加響應式類別 -->
+                            <div class="col-12 col-md-3">
+                                <h5 class="mb-3 text-center" style="color:#434953;">🎯目標照片</h5>
+                                <div class="target-photo-container mb-3 d-flex justify-content-center">
+                                    <img id="targetPhoto" src="" alt="目標照片" class="targetPhoto">
+                                </div>
+                                <!-- 遊戲控制區 -->
+                                <div class="game-controls mb-4 text-center">
+                                    <button id="startBtn" class="game-controls btn btn-primary btn-lg px-4 me-3">開始遊戲</button>
+                                    <button id="hintBtn" class="game-controls btn btn-outline-secondary me-3 text-center">
+                                        提示 (<span id="hintCount">3</span>)
+                                    </button>
+                                </div>
+
+                                <!-- 計時器 -->
+                                <div class="timer-container bg-white rounded shadow-sm p-4 mb-4">
+                                    <h5 class="mb-3 text-center" style="color:#434953;">⏱️ 計時器</h5>
+                                    <div class="text-center">
+                                        <span id="timer" class="display-4 fw-bold text-primary">0.00</span>
+                                        <div class="small text-muted">秒</div>
+                                    </div>
+                                </div>
+
+                                <!-- 排行榜 -->
+                                <div class="leaderboard-container bg-white rounded shadow-sm p-4">
+                                    <h5 class="mb-3 text-center" style="color:#434953;">🏆 排行榜</h5>
+                                    <ol id="leaderboard" class="leaderboard-list list-unstyled">
+                                        <!-- 排行榜項目將動態載入 -->
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="statusMsg"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 回饋表單 Section -->
+<section id="section-feedback" class="content-section" style="display: none;">
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="feedback-container">
+                    <div class="feedback-header text-center mb-4">
+                        <h2 class="mb-3">聯絡我們</h2>
+                        <p class="text-muted">有任何問題或建議嗎？我們很樂意聽取您的意見！</p>
+                    </div>
+
+                    <form id="feedbackForm" class="feedback-form">
+                        <!-- 回饋類型 -->
+                        <div class="mb-3">
+                            <label class="form-label">回饋類型 *</label>
+                            <div class="feedback-type-group">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="feedbackType" id="suggestion" value="suggestion" checked>
+                                    <label class="form-check-label" for="suggestion">💡 建議</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="feedbackType" id="bug" value="bug">
+                                    <label class="form-check-label" for="bug">🐛 問題回報</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="feedbackType" id="feature" value="feature">
+                                    <label class="form-check-label" for="feature">✨ 功能需求</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="feedbackType" id="other" value="other">
+                                    <label class="form-check-label" for="other">📞 其他</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 標題 -->
+                        <div class="mb-3">
+                            <label for="feedbackSubject" class="form-label">標題 *</label>
+                            <input type="text" class="form-control" id="feedbackSubject" name="feedbackSubject" placeholder="簡述您的問題或建議" required>
+                        </div>
+
+                        <!-- 詳細內容 -->
+                        <div class="mb-3">
+                            <label for="feedbackMessage" class="form-label">詳細內容</label>
+                            <textarea class="form-control" id="feedbackMessage" name="feedbackMessage" rows="5" placeholder="請詳細描述您的問題、建議或意見..."></textarea>
+                            <div class="form-text">建議提供具體的操作步驟或截圖描述</div>
+                        </div>
+
+                        <!-- 送出按鈕 -->
+                        <div class="text-center d-flex justify-content-center gap-3">
+                            <button type="submit" class="btn btn-primary btn-lg px-md-4">
+                                📤 送出回饋
+                            </button>
+                            <button type="reset" class="btn btn-outline-secondary btn-lg px-md-4">
+                                🔄 重設表單
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- 送出成功訊息 -->
+                    <div id="feedbackSuccess" class="alert alert-success mt-4" style="display: none;">
+                        <h5>✅ 回饋送出成功！</h5>
+                        <p class="mb-0">感謝您的寶貴意見，我們會盡快回覆您。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <div id="loading" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:999;background:rgba(89,97,116,0.85);flex-direction:column;justify-content:center;align-items:center;">
+        <div class="loader"></div>
+        <h2 style="color:#fff;">載入中，請稍候...</h2>
+        <p style="color:#ccc; font-size:0.85rem;">請稍候片刻，生成時間約兩分鐘</p>
+    </div>
+
+    <!-- 遊戲倒數計時覆蓋層 -->
+    <div id="countdownOverlay" class="countdown-overlay" style="display:none;">
+        <div class="countdown-number">3</div>
+    </div>
+
+  </main>
+
+  <footer class="text-center py-3">
+    學生專題作品｜靜宜大學資訊管理系<br>
+    指導老師：簡永仁 教授 ｜ 聯絡信箱：s1101734@gm.pu.edu.tw<br>
+    &copy; AI Collage All Rights Reserved.
+  </footer>
+
+  <!-- Bootstrap 5 bundle (包含 Popper)，不需 jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/imagesloaded@5/imagesloaded.pkgd.min.js"></script>
+  <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+  <!-- 設定全域變數 -->
+  <script>
+    window.STATIC_BASE = "{{ url_for('static', filename='') }}";
+  </script>
+
+  <!-- 功能模組 JavaScript -->
+  <script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/collage.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/gallery.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/game.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/feedback.js') }}"></script>
+</body>
+</html>
