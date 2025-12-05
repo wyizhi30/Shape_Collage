@@ -67,10 +67,27 @@ def generate_collage():
     try:
         result = generate_collage_info_from_request(request, app.config['UPLOAD_FOLDER'], max_upload_files=100)
         
-        # 先回傳給前端，使用者決定要不要儲存
+        # ---------- 儲存 DB ----------
+        now_ts = time.time()
+        collage_id = f"{int(now_ts)}"
+
+        # 建立新的拼貼紀錄
+        collage = Collage(
+            id=collage_id,
+            preview_src="",   # 你目前不用 preview
+            info_json=json.dumps(result, ensure_ascii=False),
+            created_at=now_ts,
+            updated_at=now_ts
+        )
+        db.session.add(collage)
+        db.session.commit()
+        # -----------------------------
+        
         return jsonify({
-            'success': True,
-            'image_info': result["image_info"]
+            "success": True,
+            "collage_id": collage_id,
+            "image_info": result["image_info"],
+            "images": result["images"]
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 400

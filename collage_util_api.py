@@ -305,7 +305,7 @@ def get_mask(canvas, shape, custom_mask_path=None, text_input=None, drawn_shape_
     else:
         return None
 
-def paste_jittered_grid_photos(images, canvas_size=(600, 600), grid=(30, 30), jitter_ratio=0.2, shape="rectangle", target_img=None, custom_mask_path=None, text_input=None, drawn_shape_file=None):
+def paste_jittered_grid_photos(generated_images, canvas_size=(600, 600), grid=(30, 30), jitter_ratio=0.2, shape="rectangle", target_img=None, custom_mask_path=None, text_input=None, drawn_shape_file=None):
     canvas = Image.new("RGBA", canvas_size, (255, 255, 255, 0))
     grid_w, grid_h = grid
     cell_w = canvas_size[0] // grid_w
@@ -313,8 +313,12 @@ def paste_jittered_grid_photos(images, canvas_size=(600, 600), grid=(30, 30), ji
     mask = get_mask(canvas, shape, custom_mask_path, text_input, drawn_shape_file)
     if not target_img:
         raise ValueError("主圖找不到，是不是忘記丟進來?")
+    
     image_info = []
+    images = []
     candidate_cells = []
+    
+    # 生成所有可能的位置
     for gx in range(grid_w):
         for gy in range(grid_h):
             base_x = gx * cell_w + cell_w // 2
@@ -329,46 +333,43 @@ def paste_jittered_grid_photos(images, canvas_size=(600, 600), grid=(30, 30), ji
                 if mask.getpixel((cx, cy)) < 128:
                     continue
             candidate_cells.append((cx, cy))
+    
     if not candidate_cells:
         raise ValueError("整張圖都沒地方貼啦，調整一下 shape 或 grid")
     
-    target_pos = random.choice(candidate_cells)
-    candidate_cells.remove(target_pos)
-    def process_one(img_dict, pos, is_target=False):
-        img = img_dict["img"].copy()
-        fname = img_dict["filename"]
-        target_size = int(min(cell_w, cell_h) * 1.5)
-        orig_w, orig_h = img.size
-        scale = min(target_size / orig_w, target_size / orig_h)
-        new_w = int(orig_w * scale)
-        new_h = int(orig_h * scale)
-        img = img.resize((new_w, new_h), Image.LANCZOS)
-        top_left = (pos[0] - img.width // 2, pos[1] - img.height // 2)
+    target_size = int(min(cell_w, cell_h) * 1.5)
+    orig_w, orig_h = target_img["img"].size
+    scale = min(target_size / orig_w, target_size / orig_h)
+    new_w = int(orig_w * scale)
+    new_h = int(orig_h * scale)
+    
+    for i, pos in enumerate(candidate_cells):
+        # 計算圖片尺寸（假設所有圖片都用相同的縮放邏輯）
+        # 這裡用一個標準尺寸，前端會重新處理
+        
+        top_left = (pos[0] - new_w // 2, pos[1] - new_h // 2)
         rotate_angle = random.randint(0, 360)
-        if is_target:
-            image_info.append({
-                "x": top_left[0],
-                "y": top_left[1],
-                "w": img.width,
-                "h": img.height,
-                "rotate": rotate_angle,
-                "src": url_for('static', filename=f"uploads/{fname}"),
-                "is_target": is_target  # 告訴前端這是不是主圖
-            })
-        else:
-            image_info.append({
-                "x": top_left[0],
-                "y": top_left[1],
-                "w": img.width,
-                "h": img.height,
-                "rotate": rotate_angle,
-                "src": url_for('static', filename=f"generated_images/{fname}"),
-                "is_target": is_target  # 告訴前端這是不是主圖
-            })
-    process_one(target_img, target_pos, is_target=True)
-    for pos in candidate_cells:
-        process_one(random.choice(images), pos)
-    return image_info
+        
+        image_info.append({
+            "x": top_left[0],
+            "y": top_left[1],
+            "w": new_w,
+            "h": new_h,
+            "rotate": rotate_angle
+        })
+    
+    images.append({
+        "img_path": f"/static/uploads/{target_img['filename']}", "is_target": True
+    })
+    for img in generated_images:
+        images.append({
+            "img_path": f"/static/generated_images/{img['filename']}", "is_target": False
+        })
+    
+    return {
+        "image_info": image_info,
+        "images": images
+    }
 
 def generate_collage_info_from_request(request, upload_folder, max_upload_files=100):
     try:
@@ -392,7 +393,8 @@ def generate_collage_info_from_request(request, upload_folder, max_upload_files=
     # 準備主圖資訊
     target_image_dict = {"img": img, "filename": filename}
     
-    images = ai_generate(filepath)
+    # 生成 AI 圖片
+    generated_images = ai_generate(filepath)
     
     # 處理自訂遮罩
     custom_mask_path = None
@@ -401,12 +403,13 @@ def generate_collage_info_from_request(request, upload_folder, max_upload_files=
         custom_mask_path = os.path.join(upload_folder, mask_filename)
         mask_file.save(custom_mask_path)
 
-    # 呼叫 paste_jittered_grid_photos（回傳 List[Dict]）
-    image_info = paste_jittered_grid_photos(
-        images, canvas_size=(600, 600), grid=(18, 18), shape=shape, target_img=target_image_dict,
+    # 生成位置資訊
+    result = paste_jittered_grid_photos(
+        generated_images, canvas_size=(600, 600), grid=(18, 18), shape=shape, target_img=target_image_dict,
         custom_mask_path=custom_mask_path, text_input=text_input, drawn_shape_file=drawn_shape_file
     )
-
+    
     return {
-        "image_info": image_info
+        "image_info": result["image_info"],
+        "images": result["images"]
     }

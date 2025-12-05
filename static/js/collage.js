@@ -255,39 +255,67 @@ function displayResult(data) {
     const playGameBtn = document.getElementById('playGameBtn');
     const saveConfirmBox = document.getElementById('saveConfirmBox');
 
-    if (data.image_info) {
-        collageResult.textContent = '拼貼產生成功！';
-
-        const baseSize = 600;
-        canvasBox.innerHTML = "";
-        data.image_info.forEach(img => {
-            const el = document.createElement("img");
-            el.src = img.src;
-            el.className = "photo";
-            el.style.cssText = `
-                left: ${(img.x / baseSize * 100)}%;
-                top: ${(img.y / baseSize * 100)}%;
-                width: ${(img.w / baseSize * 100)}%;
-                height: ${(img.h / baseSize * 100)}%;
-                --angle: ${img.rotate}deg;
-            `;
-            canvasBox.appendChild(el);
-        });
-
-        // 顯示下載與開始遊戲按鈕
-        downloadSection.style.display = 'block';
-        playGameBtn.style.display = 'inline-block';
-        saveConfirmBox.style.display = 'block';
-        
-        bindSaveConfirmButtons();
-
-        window.generatedCollage = data; // 暫存生成的拼貼資料以便保存
-        showSaveToastOnce();
-    } else {
+    if (!data.image_info || !data.images || data.image_info.length === 0 || data.images.length === 0) {
         collageResult.textContent = data.error || '產生失敗';
         downloadSection.style.display = 'none';
         playGameBtn.style.display = 'none';
+        return;
     }
+
+    collageResult.textContent = '拼貼產生成功！';
+
+    const baseSize = 600;
+    canvasBox.innerHTML = "";
+
+    const positions = data.image_info;
+
+    /** ✨ 直接在這裡隨機排序圖片清單 ✨ */
+    const imageList = shuffle(data.images);
+
+    // 按位置依序放圖片
+    positions.forEach((pos, index) => {
+        const imgData = imageList[index % imageList.length];
+
+        const el = document.createElement("img");
+        el.src = imgData.img_path;
+        el.className = imgData.is_target ? "photo target-photo" : "photo";
+
+        el.style.cssText = `
+            left: ${(pos.x / baseSize * 100)}%;
+            top: ${(pos.y / baseSize * 100)}%;
+            width: ${(pos.w / baseSize * 100)}%;
+            height: ${(pos.h / baseSize * 100)}%;
+            --angle: ${pos.rotate}deg;
+        `;
+
+        el.onerror = function () {
+            console.warn(`圖片載入失敗: ${this.src}`);
+            this.style.display = 'none';
+        };
+
+        canvasBox.appendChild(el);
+    });
+
+    // 顯示按鈕
+    downloadSection.style.display = 'block';
+    playGameBtn.style.display = 'inline-block';
+    saveConfirmBox.style.display = 'block';
+
+    bindSaveConfirmButtons();
+    window.generatedCollage = data;
+    showSaveToastOnce();
+}
+
+/** =========================
+ *   ✨ 內建 shuffle 函式 ✨
+ *  ========================= */
+function shuffle(arr) {
+    const array = arr.slice();
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
 }
 
 function showSaveToastOnce() {

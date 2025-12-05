@@ -256,46 +256,69 @@ const CountdownModule = {
 // 拼貼渲染模組 - 使用 DocumentFragment 優化
 const CollageModule = {
     render(data, collageId) {
-        // 清除任何之前的 transform
+        // 清空 canvas
         DOM.canvasBox.innerHTML = '';
         DOM.canvasBox.style.transform = '';
         DOM.canvasBox.style.transformOrigin = '';
-        
+
         state.targetEl = null;
         state.collageLoaded = false;
 
-        const images = data.image_info || [];
-        if (!images.length) {
+        if (!data.image_info || !data.images) {
+            console.warn("拼貼資料不完整");
             state.collageLoaded = true;
             return;
         }
 
+        const positions = data.image_info;
+        let targetUsed = false;
+
+        // 合併位置和隨機圖片
+        const merged = positions.map(pos => {
+            let selected;
+            do {
+                selected = data.images[Math.floor(Math.random() * data.images.length)];
+            } while (selected.is_target && targetUsed); // 確保主圖只用一次
+
+            if (selected.is_target) targetUsed = true;
+
+            return {
+                x: pos.x,
+                y: pos.y,
+                w: pos.w,
+                h: pos.h,
+                rotate: pos.rotate,
+                src: selected.img_path,
+                is_target: selected.is_target
+            };
+        });
+
         // 顯示目標照片
         const targetPhoto = document.getElementById('targetPhoto');
-        const targetImage = images.find(img => img.is_target);
+        const targetImage = merged.find(img => img.is_target);
         if (targetPhoto && targetImage) {
             targetPhoto.src = targetImage.src;
             targetPhoto.style.display = 'block';
         }
 
+        // 渲染拼貼圖
         const fragment = document.createDocumentFragment();
         let loadedCount = 0;
 
-        images.forEach(imgData => {
+        merged.forEach(imgData => {
             const img = this.createImageElement(imgData);
             if (imgData.is_target) state.targetEl = img;
-            
+
             const handleLoad = () => {
-                if (++loadedCount === images.length) this.onLoaded();
+                if (++loadedCount === merged.length) this.onLoaded();
             };
-            
+
             img.addEventListener('load', handleLoad);
             img.addEventListener('error', handleLoad);
             fragment.appendChild(img);
         });
 
         DOM.canvasBox.appendChild(fragment);
-
         state.currentCollageId = collageId;
         LeaderboardModule.update(data.leaderboard || []);
     },
@@ -305,11 +328,11 @@ const CollageModule = {
         img.src = imgData.src;
         img.className = 'photo';
         img.dataset.isTarget = imgData.is_target;
-        
+
         img.style.cssText = `
-            left: ${(imgData.x / GameConfig.BASE_SIZE * 100)}%; 
+            left: ${(imgData.x / GameConfig.BASE_SIZE * 100)}%;
             top: ${(imgData.y / GameConfig.BASE_SIZE * 100)}%;
-            width: ${(imgData.w / GameConfig.BASE_SIZE * 100)}%; 
+            width: ${(imgData.w / GameConfig.BASE_SIZE * 100)}%;
             height: ${(imgData.h / GameConfig.BASE_SIZE * 100)}%;
             --angle: ${imgData.rotate}deg;
         `;
@@ -318,7 +341,6 @@ const CollageModule = {
 
     onLoaded() {
         state.collageLoaded = true;
-        
         if (state.active && state.hintsLeft > 0 && !state.hintCooldown) {
             DOM.hintBtn.disabled = false;
         }
