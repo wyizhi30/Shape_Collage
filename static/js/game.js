@@ -4,19 +4,6 @@
 
 // 🎯 全域變數
 const DOM = {};
-const state = {
-    active: false,
-    timerInterval: null,
-    startTime: 0,
-    elapsed: 0,
-    penaltyTime: 0,
-    hintsLeft: 3,
-    hintCooldown: false,
-    collageLoaded: false,
-    currentCollageId: null,
-    targetEl: null,
-    hintOverlay: null
-};
 
 const GameConfig = {
     HINT_COOLDOWN: 5000,
@@ -25,7 +12,21 @@ const GameConfig = {
     COUNTDOWN_SECONDS: 3,
     TIMER_UPDATE_INTERVAL: 50,
     HINT_ARROW_DURATION: 1400,
-    BASE_SIZE: 600  // 🔥 統一管理
+    BASE_SIZE: 600 
+};
+
+const state = {
+    active: false,
+    timerInterval: null,
+    startTime: 0,
+    elapsed: 0,
+    penaltyTime: 0,
+    hintsLeft: GameConfig.MAX_HINTS,
+    hintCooldown: false,
+    collageLoaded: false,
+    currentCollageId: null,
+    targetEl: null,
+    hintOverlay: null
 };
 
 // ==========================================
@@ -204,52 +205,51 @@ const ClickHandler = {
 
 // 倒數計時模組
 const CountdownModule = {
+    overlay: null,
+    number: null,
+
+    init() {
+        // 初始化時建立 overlay（只建一次）
+        this.overlay = document.createElement('div');
+        this.overlay.id = 'countdownOverlay';
+        this.overlay.style.cssText = `
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+            display: none; align-items: center; justify-content: center;
+            z-index: 1000;
+        `;
+        
+        this.number = document.createElement('div');
+        this.number.className = 'countdown-number';
+        this.number.style.cssText = `
+            font-size: 6rem; color: white; font-weight: bold; text-align: center;
+        `;
+        
+        this.overlay.appendChild(this.number);
+        document.body.appendChild(this.overlay);
+    },
+
     show(callback) {
-        const overlay = this.getOrCreateOverlay();
-        const number = overlay.querySelector('.countdown-number');
+        if (!this.overlay) this.init();
 
         DOM.startBtn.disabled = true;
         DOM.canvasBox.style.visibility = 'hidden';
-        overlay.style.display = 'flex';
+        this.overlay.style.display = 'flex';
 
         let count = GameConfig.COUNTDOWN_SECONDS;
         const tick = () => {
             if (count > 0) {
-                number.textContent = count--;
+                this.number.textContent = count--;
                 setTimeout(tick, 800);
             } else {
-                number.textContent = 'GO!';
+                this.number.textContent = 'GO!';
                 setTimeout(() => {
-                    overlay.style.display = 'none';
+                    this.overlay.style.display = 'none';
                     DOM.canvasBox.style.visibility = 'visible';
                     callback();
                 }, 600);
             }
         };
         tick();
-    },
-
-    getOrCreateOverlay() {
-        let overlay = document.getElementById('countdownOverlay');
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.id = 'countdownOverlay';
-            overlay.style.cssText = `
-                position: fixed; inset: 0; background: rgba(0,0,0,0.8);
-                display: flex; align-items: center; justify-content: center;
-                z-index: 1000;
-            `;
-            
-            const number = document.createElement('div');
-            number.className = 'countdown-number';
-            number.style.cssText = `
-                font-size: 6rem; color: white; font-weight: bold; text-align: center;
-            `;
-            
-            overlay.appendChild(number);
-            document.body.appendChild(overlay);
-        }
-        return overlay;
     }
 };
 
@@ -271,33 +271,52 @@ const CollageModule = {
         }
 
         const positions = data.image_info;
-        let targetUsed = false;
-
-        // 合併位置和隨機圖片
-        const merged = positions.map(pos => {
-            let selected;
-            do {
-                selected = data.images[Math.floor(Math.random() * data.images.length)];
-            } while (selected.is_target && targetUsed); // 確保主圖只用一次
-
-            if (selected.is_target) targetUsed = true;
-
+        
+        // 🎲 隨機決定主圖出現的位置
+        const targetPosIndex = Math.floor(Math.random() * positions.length);
+        
+        // 分離主圖和非主圖
+        const targetImg = data.images.find(img => img.is_target);
+        const nonTargetImgs = data.images.filter(img => !img.is_target);
+        
+        // 打亂非主圖順序（避免連續重複）
+        const shuffledNonTargets = this.shuffleArray([...nonTargetImgs]);
+        
+        // 合併位置和圖片
+        const merged = positions.map((pos, idx) => {
+            let imgData;
+            
+            if (idx === targetPosIndex) {
+                // 主圖只在這個位置出現
+                imgData = targetImg;
+            } else {
+                // 循環使用非主圖（每輪重新洗牌）
+                const adjustedIdx = idx > targetPosIndex ? idx - 1 : idx;
+                const cyclePosition = adjustedIdx % shuffledNonTargets.length;
+                
+                // 每個循環開始時重新洗牌
+                if (cyclePosition === 0 && adjustedIdx > 0) {
+                    this.shuffleArray(shuffledNonTargets);
+                }
+                
+                imgData = shuffledNonTargets[cyclePosition];
+            }
+            
             return {
                 x: pos.x,
                 y: pos.y,
                 w: pos.w,
                 h: pos.h,
                 rotate: pos.rotate,
-                src: selected.img_path,
-                is_target: selected.is_target
+                src: imgData.img_path,
+                is_target: imgData.is_target
             };
         });
 
         // 顯示目標照片
         const targetPhoto = document.getElementById('targetPhoto');
-        const targetImage = merged.find(img => img.is_target);
-        if (targetPhoto && targetImage) {
-            targetPhoto.src = targetImage.src;
+        if (targetPhoto && targetImg) {
+            targetPhoto.src = targetImg.img_path;
             targetPhoto.style.display = 'block';
         }
 
@@ -321,6 +340,15 @@ const CollageModule = {
         DOM.canvasBox.appendChild(fragment);
         state.currentCollageId = collageId;
         LeaderboardModule.update(data.leaderboard || []);
+    },
+
+    // Fisher-Yates 洗牌演算法
+    shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
     },
 
     createImageElement(imgData) {
@@ -432,25 +460,6 @@ const DOMModule = {
     }
 };
 
-// ✅ 簡化版
-function initDOM() {
-    DOM.gameArea = document.getElementById('gameArea');
-    DOM.startBtn = document.getElementById('startBtn');
-    DOM.hintBtn = document.getElementById('hintBtn');
-    DOM.timer = document.getElementById('timer');
-    DOM.statusMsg = document.getElementById('statusMsg');
-    DOM.hintCount = document.getElementById('hintCount');
-    DOM.canvasBox = document.getElementById('game-canvas-box');
-    DOM.leaderboard = document.getElementById('leaderboard');
-    DOM.gameOverModal = document.getElementById('gameOverModal');
-    DOM.modalTime = document.getElementById('modalTime');
-    DOM.modalRank = document.getElementById('modalRank');
-    DOM.playAgainBtn = document.getElementById('playAgainBtn');
-    DOM.backBtn = document.getElementById('backBtn');
-    
-    return DOM.gameArea && DOM.startBtn; // 簡單檢查
-}
-
 function updateDisplay(updates) {
     if ('timer' in updates && DOM.timer) {
         DOM.timer.textContent = (updates.timer || 0).toFixed(2);
@@ -487,21 +496,64 @@ function setupGame() {
     createHintOverlay();
 }
 
-function startGame() {
+async function reloadCollageAndStart() {
+    if (!state.currentCollageId) {
+        alert("請先製作拼貼！");
+        return;
+    }
+
+    // 如果計時器正在跑，先停止
+    if (state.timerInterval) {
+        TimerModule.stop();
+    }
+    
+    // 狀態重置
     Object.assign(state, {
-        active: true,
-        startTime: Date.now(),
+        active: false,
+        collageLoaded: false,
+        hintsLeft: GameConfig.MAX_HINTS,
         penaltyTime: 0,
-        hintsLeft: 3
+        hintCooldown: false
     });
-    
-    DOM.gameArea.style.display = '';
-    
-    updateDisplay({ hints: state.hintsLeft, status: '找找看拼貼中的目標！' });
-    TimerModule.start();
-    
-    if (state.collageLoaded && !state.hintCooldown) {
-        DOM.hintBtn.disabled = false;
+
+    // 清除畫面
+    DOM.canvasBox.innerHTML = '';
+    DOM.gameArea.style.display = 'none';
+
+    try {
+        const res = await fetch(`/collage/${state.currentCollageId}`);
+        const data = await res.json();
+
+        // 重新渲染拼貼（會重新隨機圖片位置）
+        CollageModule.render(data, state.currentCollageId);
+
+        // 等待載入完畢再開始遊戲
+        const checkLoaded = setInterval(() => {
+            if (state.collageLoaded) {
+                clearInterval(checkLoaded);
+                
+                CountdownModule.show(() => {
+                    Object.assign(state, {
+                        active: true,
+                        startTime: Date.now(),
+                        penaltyTime: 0,
+                        hintsLeft: GameConfig.MAX_HINTS
+                    });
+                    
+                    DOM.gameArea.style.display = '';
+                    updateDisplay({ hints: state.hintsLeft, status: '找找看拼貼中的目標！' });
+                    TimerModule.start();
+                    
+                    if (state.collageLoaded && !state.hintCooldown) {
+                        DOM.hintBtn.disabled = false;
+                    }
+                });
+            }
+        }, 100);
+
+    } catch (err) {
+        console.error("重新載入拼貼錯誤：", err);
+        alert("拼貼載入失敗，請再試一次");
     }
 }
 
@@ -513,7 +565,7 @@ function bindEvents() {
             return;
         }
 
-        CountdownModule.show(startGame);
+        reloadCollageAndStart();  // 第一次也用這個
     });
 
     DOM.hintBtn.addEventListener('click', () => HintModule.handle());
@@ -521,7 +573,7 @@ function bindEvents() {
 
     DOM.playAgainBtn.addEventListener('click', () => {
         ModalModule.hide();
-        DOM.startBtn.click();
+        reloadCollageAndStart();
     });
 
     DOM.backBtn.addEventListener('click', () => {
@@ -566,51 +618,6 @@ function createHintOverlay() {
     DOM.hintBtn.disabled = !state.collageLoaded;
 }
 
-/**
- * 📥 載入最新生成的拼貼資料
- * 
- * 從後端 API 取得最新的拼貼資訊並渲染到遊戲畫布
- * 流程：取得拼貼清單 → 找到最新項目 → 取得詳細資料 → 渲染遊戲
- */
-async function loadLatestCollage() {
-    try {
-        // 📊 取得拼貼庫清單
-        const galleryData = await fetch('/gallery').then(res => res.json());
-        if (galleryData.items?.length > 0) {
-            // 🎯 取得最新拼貼的 ID（假設第一個是最新的）
-            const latestId = galleryData.items[0].id;
-            // 📄 取得該拼貼的詳細資料（包含圖片位置資訊）
-            const collageData = await fetch(`/collage/${latestId}`).then(res => res.json());
-            // 🎮 將拼貼資料渲染到遊戲畫布
-            CollageModule.render(collageData, latestId);
-        }
-    } catch (err) {
-        console.error('載入最新拼貼失敗:', err);
-    }
-}
-
-/**
- * 🎮 設置拼貼載入後的遊戲環境
- * 
- * 當拼貼成功載入後，準備遊戲界面讓用戶可以開始遊戲
- * 功能：顯示遊戲按鈕 → 設置導航 → 更新狀態訊息 → 刷新拼貼庫
- */
-function setupGameAfterCollage() {
-    // 🔘 顯示遊戲導航按鈕
-    const navGame = document.getElementById('navGame');
-    if (navGame) navGame.style.display = '';
-    
-    // 🎯 設置當前頁面為遊戲頁面（如果有導航函數）
-    if (typeof setActiveNav === 'function') setActiveNav('game');
-    
-    // 💬 更新狀態訊息，提示用戶可以開始遊戲
-    updateDisplay({ status: '按下開始遊戲按鈕開始！' });
-    state.active = false;
-    DOM.gameArea.style.display = '';
-    
-    if (typeof fetchGallery === 'function') fetchGallery();
-}
-
 // ==========================================
 // 🎯 模組匯出與初始化
 // ==========================================
@@ -619,7 +626,7 @@ document.addEventListener('DOMContentLoaded', initGame);
 window.GameModule = {
     renderCollage: (data, id) => CollageModule.render(data, id),
     resetGameState: () => {
-        Object.assign(state, { active: false, hintsLeft: 3 });
+        Object.assign(state, { active: false, hintsLeft: GameConfig.MAX_HINTS });
         updateDisplay({ timer: 0, hints: state.hintsLeft});
     }
 };

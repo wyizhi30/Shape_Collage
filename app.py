@@ -149,32 +149,43 @@ def get_gallery():
 # 獲取指定拼貼的詳細資料
 @app.route('/collage/<info_id>', methods=['GET'])
 def get_collage_detail(info_id):
-    """獲取指定 ID 的拼貼詳細資料和排行榜"""
-    # 從資料庫載入拼貼資料
-    image_info = None
     try:
         collage = Collage.query.filter_by(id=info_id).first()
-        
-        if collage and collage.info_json:
-            try:
-                image_info = json.loads(collage.info_json)
-            except Exception:
-                image_info = None
-    except Exception:
-        image_info = None
+        if not collage or not collage.info_json:
+            return jsonify({"error": "Collage not found"}), 404
 
-    # 如果資料庫中沒有找到，回傳錯誤
-    if image_info is None:
-        return jsonify({"error": "Collage not found"}), 404
+        # ---- 解析 info_json ----
+        try:
+            raw = json.loads(collage.info_json)
+        except Exception:
+            raw = {}
 
-    # 載入排行榜資料
-    try:
-        scores = Leaderboard.query.filter_by(collage_id=info_id).order_by(Leaderboard.time.asc()).limit(10).all()
-        leaderboard = [{"name": score.name, "time": score.time} for score in scores]
-    except Exception:
-        leaderboard = []
+        # ---- 解包核心資料 ----
+        image_info = raw.get("image_info", [])
+        images = raw.get("images", [])
 
-    return jsonify({"image_info": image_info, "leaderboard": leaderboard})
+        # ---- 載入排行榜 ----
+        try:
+            scores = (Leaderboard.query
+                        .filter_by(collage_id=info_id)
+                        .order_by(Leaderboard.time.asc())
+                        .limit(10)
+                        .all())
+            leaderboard = [{"name": s.name, "time": s.time} for s in scores]
+        except Exception:
+            leaderboard = []
+
+        # ---- 直接回傳前端需要的乾淨格式 ----
+        return jsonify({
+            "image_info": image_info,   # 324 個位置
+            "images": images,           # 13 張圖片（包含 target）
+            "leaderboard": leaderboard
+        })
+
+    except Exception as e:
+        print("ERROR in get_collage_detail:", e)
+        return jsonify({"error": "Server error"}), 500
+
 
 # 排行榜相關路由
 @app.route('/collage/<collage_id>/leaderboard', methods=['GET'])

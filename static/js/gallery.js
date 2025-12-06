@@ -45,7 +45,7 @@ async function fetchGallery() {
         const frag = document.createDocumentFragment();
         
         data.items.forEach(item => {
-            if (!item?.preview_src) return;
+            // if (!item?.preview_src) return;
             
             const card = document.createElement('div');
             card.className = 'grid-item mb-4';
@@ -82,7 +82,7 @@ async function loadCollageGame(collageId) {
     try {
         const res = await fetch(`/collage/${collageId}`);
         const freshData = await res.json();
-        
+        console.log(freshData)
         if (!freshData?.image_info) {
             alert('拼貼數據無效');
             return;
