@@ -11,7 +11,7 @@ const GameConfig = {
     MAX_HINTS: 3,
     COUNTDOWN_SECONDS: 3,
     TIMER_UPDATE_INTERVAL: 50,
-    HINT_ARROW_DURATION: 1400,
+    HINT_ARROW_DURATION: 1800,
     BASE_SIZE: 600 
 };
 
@@ -44,7 +44,9 @@ const HintModule = {
         updateDisplay({ hints: state.hintsLeft });
         this.startCooldown();
         
-        if (state.targetEl && state.collageLoaded) this.showArrow();
+        if (state.targetEl && state.collageLoaded) {
+            this.showCircleHint();
+        }
     },
 
     startCooldown() {
@@ -75,52 +77,43 @@ const HintModule = {
         if (state.hintsLeft > 0) DOM.hintBtn.disabled = false;
     },
 
-    showArrow() {
-        const boxRect = DOM.canvasBox.getBoundingClientRect();
+    showCircleHint() {
         const targetRect = state.targetEl.getBoundingClientRect();
+        const boxRect = DOM.canvasBox.getBoundingClientRect();
         
-        const center = { x: boxRect.width / 2, y: boxRect.height / 2 };
-        const target = {
-            x: (targetRect.left - boxRect.left) + targetRect.width / 2,
-            y: (targetRect.top - boxRect.top) + targetRect.height / 2
-        };
+        // 計算目標圖片的中心點（相對於 canvas）
+        const centerX = (targetRect.left - boxRect.left) + targetRect.width / 2;
+        const centerY = (targetRect.top - boxRect.top) + targetRect.height / 2;
         
-        const dx = target.x - center.x;
-        const dy = target.y - center.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+        // 固定半徑（可調整，單位 px）
+        const radius = 80;
         
-        const maxLength = Math.max(DOM.canvasBox.clientWidth, DOM.canvasBox.clientHeight) * 0.8;
-        const arrowLength = Math.min(Math.max(distance - 50, 40), maxLength);
+        // 建立圓圈元素
+        const circle = document.createElement('div');
+        circle.className = 'hint-circle';
+        circle.style.left = `${centerX - radius}px`;
+        circle.style.top = `${centerY - radius}px`;
+        circle.style.width = `${radius * 2}px`;
+        circle.style.height = `${radius * 2}px`;
         
-        this.createArrow(center.x, center.y, arrowLength, angle);
+        DOM.canvasBox.appendChild(circle);
+        
+        // 高亮目標圖片
         this.highlightTarget();
-    },
-
-    createArrow(x, y, length, angle) {
-        const arrow = document.createElement('div');
-        arrow.style.cssText = `
-            position: absolute; left: ${x}px; top: ${y-3}px; width: ${length}px;
-            height: 6px; background: linear-gradient(90deg, #f6ad55, #ed8936);
-            border-radius: 3px; transform-origin: 0 50%; transform: rotate(${angle}deg);
-            z-index: 10; pointer-events: none;
-        `;
         
-        const head = document.createElement('div');
-        head.style.cssText = `
-            position: absolute; right: -6px; top: -3px; width: 0; height: 0;
-            border-left: 12px solid #ed8936; border-top: 6px solid transparent;
-            border-bottom: 6px solid transparent;
-        `;
-        
-        arrow.appendChild(head);
-        DOM.canvasBox.appendChild(arrow);
-        
-        setTimeout(() => arrow.remove(), GameConfig.HINT_ARROW_DURATION);
+        // 自動消失
+        setTimeout(() => {
+            circle.classList.add('fade-out');
+            setTimeout(() => circle.remove(), 400);
+        }, GameConfig.HINT_ARROW_DURATION - 400);
     },
 
     highlightTarget() {
-        state.targetEl.style.filter = 'drop-shadow(0 0 8px #f6ad55)';
+        // 浮到最上層
+        state.targetEl.style.zIndex = '999';
+
+        state.targetEl.style.filter = 'drop-shadow(0 0 8px #ffffffff)';
+        //drop-shadow(offsetX offsetY blurRadius color)，blurRadius，模糊半徑，數字越大陰影越模糊、越擴散
         setTimeout(() => state.targetEl.style.filter = '', GameConfig.HINT_ARROW_DURATION);
     }
 };
@@ -152,6 +145,7 @@ const ClickHandler = {
         if (!state.active || !e.target.classList.contains('photo')) return;
 
         if (e.target.dataset.isTarget === 'true') {
+            state.targetEl.style.zIndex = '999';
             this.handleTarget();
         } else {
             this.handleMiss(e);
@@ -565,7 +559,7 @@ function bindEvents() {
             return;
         }
 
-        reloadCollageAndStart();  // 第一次也用這個
+        reloadCollageAndStart();
     });
 
     DOM.hintBtn.addEventListener('click', () => HintModule.handle());
@@ -588,33 +582,37 @@ function createHintOverlay() {
     DOM.hintBtn.parentNode.insertBefore(wrapper, DOM.hintBtn);
     wrapper.appendChild(DOM.hintBtn);
 
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('width', '36');
-    svg.setAttribute('height', '36');
-    svg.setAttribute('viewBox', '0 0 36 36');
-    svg.style.cssText = `
+    // 提示按鈕的冷卻 SVG 覆蓋層
+    const cooldownSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    cooldownSvg.setAttribute('width', '36');
+    cooldownSvg.setAttribute('height', '36');
+    cooldownSvg.setAttribute('viewBox', '0 0 36 36');
+    cooldownSvg.style.cssText = `
         position: absolute; top: 50%; left: 50%; 
         transform: translate(-50%, -50%); pointer-events: none;
     `;
 
-    const bg = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    // 冷卻背景圈（灰）
+    const cooldownBg = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     Object.entries({cx: '18', cy: '18', r: '16', fill: 'none', stroke: '#e2e8f0', 'stroke-width': '3'})
-        .forEach(([k, v]) => bg.setAttribute(k, v));
-
-    const prog = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    Object.entries({cx: '18', cy: '18', r: '16', fill: 'none', stroke: '#f6ad55', 'stroke-width': '3', 'stroke-linecap': 'round', transform: 'rotate(-90 18 18)'})
-        .forEach(([k, v]) => prog.setAttribute(k, v));
+        .forEach(([k, v]) => cooldownBg.setAttribute(k, v));
     
+    // 冷卻進度圈（橘）
+    const cooldownProgress = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    Object.entries({cx: '18', cy: '18', r: '16', fill: 'none', stroke: '#f6ad55', 'stroke-width': '3', 'stroke-linecap': 'round', transform: 'rotate(-90 18 18)'})
+        .forEach(([k, v]) => cooldownProgress.setAttribute(k, v));
+    
+    // 計算圓周＝之後要用來控制冷卻動畫
     const circumference = 2 * Math.PI * 16;
-    prog.style.strokeDasharray = `${circumference} ${circumference}`;
-    prog.style.strokeDashoffset = `${circumference}`;
+    cooldownProgress.style.strokeDasharray = `${circumference} ${circumference}`;
+    cooldownProgress.style.strokeDashoffset = `${circumference}`;
 
-    svg.appendChild(bg);
-    svg.appendChild(prog);
-    wrapper.appendChild(svg);
+    cooldownSvg.appendChild(cooldownBg);
+    cooldownSvg.appendChild(cooldownProgress);
+    wrapper.appendChild(cooldownSvg);
 
-    state.hintOverlay = { svg, prog, circ: circumference };
-    svg.style.opacity = '0';
+    state.hintOverlay = { svg: cooldownSvg, prog: cooldownProgress, circ: circumference };
+    cooldownSvg.style.opacity = '0';
     DOM.hintBtn.disabled = !state.collageLoaded;
 }
 
