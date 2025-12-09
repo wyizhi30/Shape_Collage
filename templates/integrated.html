@@ -193,8 +193,19 @@
     <!-- 拼貼製作 Section -->
     <section id="section-collage" class="content-section" style="display: none;">
         <div class="container my-4">
-            <div class="justify-content-center">
-                <div style="display:flex; flex-direction:column; align-items:center; gap:20px;">
+            <div class="row g-4">
+                <!-- 左側：拼貼預覽區 -->
+                <div class="col-12 col-md-8">
+                    <div class="d-flex justify-content-center align-items-center">
+                        <div id="screenshotWrapper" style="position: relative; display: inline-block;">
+                            <div id="canvas-box"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右側：操作區 -->
+                <div class="col-12 col-md-4">
+                    <!-- 表單 -->
                     <form method="POST" action="/generate_collage" enctype="multipart/form-data" id="uploadForm" style="display:flex; flex-direction:column; align-items:center; gap:8px; background:#fff; border-radius:12px; box-shadow:0 1px 8px rgba(0,0,0,0.08); padding:28px 32px 18px 32px;">
                         <!-- 形狀選擇 -->
                         <div class="shape-radio-group">
@@ -236,13 +247,23 @@
                         <div class="display-box" id="collageResult">等待產生...</div>
                     </form>
 
-                    <!-- 拼貼預覽 -->
-                    <div id="screenshotWrapper" style="position: relative; display: inline-block;">
-                        <div id="canvas-box"></div>
+                    <!-- 下載區域 -->
+                    <div id="downloadSection" style="display: none; margin-top: 20px;">
+                        <div class="d-flex justify-content-center gap-3">
+                            <button id="screenshotBtn" class="btn btn-success btn-lg px-4" onclick="ScreenshotModule.captureAndDownload()">
+                                ⬇️ 下載
+                            </button>
+                            <button id="playGameBtn" class="btn btn-primary btn-lg px-4" onclick="startGameWithCurrentCollage()">
+                                🎮 開始遊戲
+                            </button>
+                        </div>
+                        <p class="text-center text-muted mt-2 mb-0">
+                            <small>將以 PNG 格式下載到您的下載資料夾</small>
+                        </p>
                     </div>
 
                     <!-- 修改儲存確認框 -->
-                    <div id="saveConfirmBox" style="display: none;padding:10px; background:#f8f9fa; border-radius:8px; text-align:center;">
+                    <div id="saveConfirmBox" style="display: none; margin-top: 20px; padding:10px; background:#f8f9fa; border-radius:8px; text-align:center;">
                         <h5 style="margin-bottom:10px;">是否同意公開您的拼貼作品？</h5>
                         <p style="color:#6c757d; font-size:0.9rem; margin-bottom:10px;">
                             同意公開後，您的作品將顯示在照片展示區供其他人欣賞和遊玩
@@ -259,60 +280,42 @@
                             無論是否公開，您都可以透過遊戲按鈕開始遊玩
                         </p>
                     </div>
-
-                    <!-- 下載區域 -->
-                    <div id="downloadSection" style="display: none;">
-                        <div class="d-flex justify-content-center gap-3">
-                            <button id="screenshotBtn" class="btn btn-success btn-lg px-4" onclick="ScreenshotModule.captureAndDownload()">
-                                ⬇️ 下載
-                            </button>
-                            <button id="playGameBtn" class="btn btn-primary btn-lg px-4" onclick="startGameWithCurrentCollage()">
-                                🎮 開始遊戲
-                            </button>
-                        </div>
-                        <p class="text-center text-muted mt-2 mb-0">
-                            <small>將以 PNG 格式下載到您的下載資料夾</small>
-                        </p>
-                    </div>
                 </div>
-                <!-- ✅ 手繪畫布彈出視窗 Modal -->
-                <div id="drawModal" class="draw-modal">
-                    <div class="draw-modal-backdrop"></div>
-                    <div class="draw-modal-content">
-                        <div class="draw-modal-header">
-                            <div>
-                                <h4 class="d-flex justify-content-center align-items-center mb-0">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-brush me-2" viewBox="0 0 16 16">
-                                        <path d="M15.825.12a.5.5 0 0 1 .132.584c-1.53 3.43-4.743 8.17-7.095 10.64a6.1 6.1 0 0 1-2.373 1.534c-.018.227-.06.538-.16.868-.201.659-.667 1.479-1.708 1.74a8.1 8.1 0 0 1-3.078.132 4 4 0 0 1-.562-.135 1.4 1.4 0 0 1-.466-.247.7.7 0 0 1-.204-.288.62.62 0 0 1 .004-.443c.095-.245.316-.38.461-.452.394-.197.625-.453.867-.826.095-.144.184-.297.287-.472l.117-.198c.151-.255.326-.54.546-.848.528-.739 1.201-.925 1.746-.896q.19.012.348.048c.062-.172.142-.38.238-.608.261-.619.658-1.419 1.187-2.069 2.176-2.67 6.18-6.206 9.117-8.104a.5.5 0 0 1 .596.04M4.705 11.912a1.2 1.2 0 0 0-.419-.1c-.246-.013-.573.05-.879.479-.197.275-.355.532-.5.777l-.105.177c-.106.181-.213.362-.32.528a3.4 3.4 0 0 1-.76.861c.69.112 1.736.111 2.657-.12.559-.139.843-.569.993-1.06a3 3 0 0 0 .126-.75zm1.44.026c.12-.04.277-.1.458-.183a5.1 5.1 0 0 0 1.535-1.1c1.9-1.996 4.412-5.57 6.052-8.631-2.59 1.927-5.566 4.66-7.302 6.792-.442.543-.795 1.243-1.042 1.826-.121.288-.214.54-.275.72v.001l.575.575zm-4.973 3.04.007-.005zm3.582-3.043.002.001h-.002z"/>
-                                    </svg>
-                                    創意手繪工作區
-                                </h4>
-                                <p class="mb-0">盡情發揮你的創意，繪製獨特的拼貼形狀</p>
-                            </div>
+            </div>
+
+            <!-- ✅ 手繪畫布彈出視窗 Modal -->
+            <div id="drawModal" class="draw-modal">
+                <div class="draw-modal-backdrop"></div>
+                <div class="draw-modal-content">
+                    <div class="draw-modal-header">
+                        <div>
+                            <h4 class="d-flex justify-content-center align-items-center mb-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-brush me-2" viewBox="0 0 16 16">
+                                    <path d="M15.825.12a.5.5 0 0 1 .132.584c-1.53 3.43-4.743 8.17-7.095 10.64a6.1 6.1 0 0 1-2.373 1.534c-.018.227-.06.538-.16.868-.201.659-.667 1.479-1.708 1.74a8.1 8.1 0 0 1-3.078.132 4 4 0 0 1-.562-.135 1.4 1.4 0 0 1-.466-.247.7.7 0 0 1-.204-.288.62.62 0 0 1 .004-.443c.095-.245.316-.38.461-.452.394-.197.625-.453.867-.826.095-.144.184-.297.287-.472l.117-.198c.151-.255.326-.54.546-.848.528-.739 1.201-.925 1.746-.896q.19.012.348.048c.062-.172.142-.38.238-.608.261-.619.658-1.419 1.187-2.069 2.176-2.67 6.18-6.206 9.117-8.104a.5.5 0 0 1 .596.04M4.705 11.912a1.2 1.2 0 0 0-.419-.1c-.246-.013-.573.05-.879.479-.197.275-.355.532-.5.777l-.105.177c-.106.181-.213.362-.32.528a3.4 3.4 0 0 1-.76.861c.69.112 1.736.111 2.657-.12.559-.139.843-.569.993-1.06a3 3 0 0 0 .126-.75zm1.44.026c.12-.04.277-.1.458-.183a5.1 5.1 0 0 0 1.535-1.1c1.9-1.996 4.412-5.57 6.052-8.631-2.59 1.927-5.566 4.66-7.302 6.792-.442.543-.795 1.243-1.042 1.826-.121.288-.214.54-.275.72v.001l.575.575zm-4.973 3.04.007-.005zm3.582-3.043.002.001h-.002z"/>
+                                </svg>
+                                創意手繪工作區
+                            </h4>
+                            <p class="mb-0">盡情發揮你的創意，繪製獨特的拼貼形狀</p>
                         </div>
-                        
-                        <div class="draw-canvas-container">
-                            <canvas id="drawCanvas" width="600" height="600"></canvas>
-                        </div>
-                        
-                        <div class="draw-modal-controls">
-                            <button type="button" id="clearCanvasBtn" class="btn btn-outline-secondary d-flex align-items-center">
-                                <!-- <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-                                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
-                                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
-                                </svg> -->
-                                🗑️ 清除畫布
-                            </button>
-                            <button type="button" id="finishDrawBtn" class="btn btn-success">
-                                ✅ 完成繪製
-                            </button>
-                        </div>
-                        
-                        <div class="draw-tips">
-                            <small class="text-muted">
-                                💡 提示：在白色區域繪製黑色線條，繪製的區域將顯示拼貼圖片
-                            </small>
-                        </div>
+                    </div>
+                    
+                    <div class="draw-canvas-container">
+                        <canvas id="drawCanvas" width="600" height="600"></canvas>
+                    </div>
+                    
+                    <div class="draw-modal-controls">
+                        <button type="button" id="clearCanvasBtn" class="btn btn-outline-secondary d-flex align-items-center">
+                            🗑️ 清除畫布
+                        </button>
+                        <button type="button" id="finishDrawBtn" class="btn btn-success">
+                            ✅ 完成繪製
+                        </button>
+                    </div>
+                    
+                    <div class="draw-tips">
+                        <small class="text-muted">
+                            💡 提示：在白色區域繪製黑色線條，繪製的區域將顯示拼貼圖片
+                        </small>
                     </div>
                 </div>
             </div>
