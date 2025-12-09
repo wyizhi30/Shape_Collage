@@ -7,7 +7,7 @@ nav.top-bar {
     box-shadow: 0 4px 24px rgba(176,139,99,0.10), 0 1.5px 4px rgba(0,0,0,0.06);
     position: sticky;
     top: 0;
-    z-index: 10;
+    z-index: 2000;
     backdrop-filter: blur(2px);
     padding: 0;
     min-height: 68px;

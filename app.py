@@ -67,21 +67,20 @@ def generate_collage():
     try:
         result = generate_collage_info_from_request(request, app.config['UPLOAD_FOLDER'], max_upload_files=100)
         
-        # ---------- 儲存 DB ----------
         now_ts = time.time()
         collage_id = f"{int(now_ts)}"
+        target_img_path = result["images"][0]["img_path"]
 
-        # 建立新的拼貼紀錄
         collage = Collage(
             id=collage_id,
-            preview_src="",   # 你目前不用 preview
+            preview_src=target_img_path,
             info_json=json.dumps(result, ensure_ascii=False),
+            is_public=False,  # ✅ 預設為不公開
             created_at=now_ts,
             updated_at=now_ts
         )
         db.session.add(collage)
         db.session.commit()
-        # -----------------------------
         
         return jsonify({
             "success": True,
@@ -92,44 +91,40 @@ def generate_collage():
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
-@app.route('/save_collage', methods=['POST'])
-def save_collage():
+# ✅ 新增：設定作品公開狀態的路由
+@app.route('/collage/<collage_id>/set_public', methods=['POST'])
+def set_collage_public(collage_id):
+    """設定拼貼作品是否公開"""
     try:
-        data = request.json
-        image_info = data.get("image_info")
-
-        if not image_info:
-            return jsonify({'error': '缺少 image_info，無法儲存'}), 400
-
-        from models import db, Collage
-
-        now_ts = time.time()
-        collage_id = f"{int(now_ts)}"
-
-        # 建立新的拼貼紀錄
-        collage = Collage(
-            id=collage_id,
-            preview_src="",  # 你不需要 preview，所以放空字串
-            info_json=json.dumps(image_info, ensure_ascii=False),
-            created_at=now_ts,
-            updated_at=now_ts
-        )
-
-        db.session.add(collage)
+        data = request.get_json()
+        is_public = data.get('is_public', False)
+        
+        collage = Collage.query.filter_by(id=collage_id).first()
+        if not collage:
+            return jsonify({'error': '拼貼作品不存在'}), 404
+        
+        collage.is_public = is_public
+        collage.updated_at = time.time()
         db.session.commit()
-
-        return jsonify({'success': True, 'collage_id': collage_id})
-
+        
+        return jsonify({
+            'success': True,
+            'collage_id': collage_id,
+            'is_public': is_public
+        })
+        
     except Exception as e:
-        print("Save failed:", e)
+        db.session.rollback()
+        print(f"設定公開狀態失敗: {e}")
         return jsonify({'error': str(e)}), 500
 
-# 獲取所有拼貼作品
+# 修改 get_gallery - 只顯示公開作品
 @app.route('/gallery', methods=['GET'])
 def get_gallery():
-    """返回所有已生成的拼貼作品列表"""
+    """返回所有已公開的拼貼作品列表"""
     try:
-        collages = Collage.query.order_by(Collage.updated_at.desc()).all()
+        # ✅ 只查詢公開作品
+        collages = Collage.query.filter_by(is_public=True).order_by(Collage.updated_at.desc()).all()
         gallery_items = []
         for collage in collages:
             gallery_items.append({
@@ -234,14 +229,13 @@ def submit_feedback():
     try:
         data = request.get_json()
         
-        # ✅ 創建回饋記錄
+        # 創建回饋記錄
         feedback = Feedback(
             type=data['feedbackType'],
             subject=data['feedbackSubject'],
             message=data['feedbackMessage']
         )
         
-        # ✅ 儲存到資料庫
         db.session.add(feedback)
         db.session.commit()
         
@@ -291,4 +285,15 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(debug=True)
-# del instance\photos.db 刪除資料庫
+    
+    
+    
+# 刪除資料表範例程式碼
+# from app import db
+# from models import Collage
+
+# # 刪掉 Collage 資料表
+# Collage.__table__.drop(db.engine)
+
+# # 如果要重建資料表
+# db.create_all()

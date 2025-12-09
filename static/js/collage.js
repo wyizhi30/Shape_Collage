@@ -245,10 +245,83 @@ document.getElementById("uploadForm")?.addEventListener("submit", function(event
         })
         .catch(err => {
             loadingDiv.style.display = 'none';
-            collageResult.textContent = "拼貼產生失敗：" + err.message;
+            collageResult.textContent = "網路異常或伺服器無回應，請稍後再試";
             console.error('Collage generation error:', err);
         });
 });
+
+// 綁定儲存確認按鈕事件
+function bindSaveConfirmButtons() {
+    const savePublicBtn = document.getElementById('savePublicBtn');
+    const savePrivateBtn = document.getElementById('savePrivateBtn');
+    
+    if (!savePublicBtn || !savePrivateBtn) {
+        console.warn('儲存按鈕元素不存在，跳過綁定');
+        return;
+    }
+    
+    function handlePublicSetting(isPublic) {
+        if (!window.generatedCollage?.collage_id) {
+            alert('找不到拼貼 ID');
+            return;
+        }
+        
+        // ✅ 立即顯示 Toast，不等待伺服器回應
+        showSaveStatusToast(isPublic);
+        
+        // ✅ 背景處理，不阻塞使用者操作
+        fetch(`/collage/${window.generatedCollage.collage_id}/set_public`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ is_public: isPublic })
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                console.log(`✅ ${isPublic ? '公開' : '私密'}設定成功`);
+                if (isPublic) setTimeout(() => saveToCarousel(), 500);
+            } else {
+                console.error('設定失敗:', result.error);
+            }
+        })
+        .catch(error => {
+            console.error('設定請求失敗:', error);
+        });
+    }
+    
+    savePublicBtn.onclick = () => handlePublicSetting(true);
+    savePrivateBtn.onclick = () => handlePublicSetting(false);
+}
+
+// ✅ 新增：顯示儲存狀態 Toast
+function showSaveStatusToast(isPublic) {
+    const existing = document.querySelector('.save-status-toast');
+    if (existing) existing.remove();
+    
+    const toast = document.createElement('div');
+    toast.className = isPublic ? 'alert alert-success mt-2 save-status-toast' : 'alert alert-secondary mt-2 save-status-toast';
+    toast.innerHTML = isPublic 
+        ? '✅ 作品已公開，現在會顯示在照片展示區'
+        : '🔒 作品已設為私密，不會顯示在公開展示區';
+    toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        max-width: 400px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => { toast.style.opacity = '1'; }, 50);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
 
 function displayResult(data) {
     const downloadSection = document.getElementById('downloadSection');
@@ -266,11 +339,10 @@ function displayResult(data) {
 
     const baseSize = 600;
     canvasBox.innerHTML = "";
-
     const positions = data.image_info;
 
-    /** ✨ 直接在這裡隨機排序圖片清單 ✨ */
-    const imageList = shuffle(data.images);
+    // ✅ 洗牌全部圖片
+    let imageList = shuffle(data.images);
 
     // 按位置依序放圖片
     positions.forEach((pos, index) => {
@@ -279,7 +351,7 @@ function displayResult(data) {
         const el = document.createElement("img");
         el.src = imgData.img_path;
         el.className = imgData.is_target ? "photo target-photo" : "photo";
-
+        
         el.style.cssText = `
             left: ${(pos.x / baseSize * 100)}%;
             top: ${(pos.y / baseSize * 100)}%;
@@ -294,6 +366,11 @@ function displayResult(data) {
         };
 
         canvasBox.appendChild(el);
+
+        if (imgData.is_target) {
+            el.dataset.isTarget = 'true';
+            imageList = imageList.filter(img => !img.is_target);
+        }
     });
 
     // 顯示按鈕
@@ -302,13 +379,13 @@ function displayResult(data) {
     saveConfirmBox.style.display = 'block';
 
     bindSaveConfirmButtons();
-    window.generatedCollage = data;
+    window.generatedCollage = {
+        ...data,
+        collage_id: data.collage_id
+    };
     showSaveToastOnce();
 }
 
-/** =========================
- *   ✨ 內建 shuffle 函式 ✨
- *  ========================= */
 function shuffle(arr) {
     const array = arr.slice();
     for (let i = array.length - 1; i > 0; i--) {
@@ -346,45 +423,6 @@ function showSaveToastOnce() {
         // 標記已顯示過
         sessionStorage.setItem('saveToastShown', 'true');
     }, 1000);
-}
-
-function bindSaveConfirmButtons() {
-    const saveConfirmBox = document.getElementById('saveConfirmBox');
-    const saveCollageBtn = document.getElementById('saveCollageBtn');
-    const cancelSaveBtn = document.getElementById('cancelSaveBtn');
-
-    if (!saveConfirmBox || !saveCollageBtn || !cancelSaveBtn) return;
-
-    // 防止多次綁定
-    saveCollageBtn.onclick = () => {
-        if (!window.generatedCollage) return;
-
-        const payload = { image_info: window.generatedCollage.image_info };
-
-        fetch('/save_collage', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                alert('✅ 拼貼已儲存！ID=' + data.collage_id);
-            } else {
-                alert('❌ 儲存失敗：' + data.error);
-            }
-            saveConfirmBox.style.display = 'none';
-        })
-        .catch(err => {
-            console.error(err);
-            alert('❌ 儲存錯誤：' + err.message);
-            saveConfirmBox.style.display = 'none';
-        });
-    };
-
-    cancelSaveBtn.onclick = () => {
-        saveConfirmBox.style.display = 'none';
-    };
 }
 
 async function startGameWithCurrentCollage() {

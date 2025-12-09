@@ -241,12 +241,23 @@
                         <div id="canvas-box"></div>
                     </div>
 
-                    <div id="saveConfirmBox" style="display:none; margin-top:10px;">
-                        <span>💾 是否要將拼貼作品存到資料庫？</span>
-                        <div style="margin-top:8px;">
-                            <button id="saveCollageBtn" class="btn btn-success">儲存</button>
-                            <button id="cancelSaveBtn" class="btn btn-secondary">取消</button>
+                    <!-- 修改儲存確認框 -->
+                    <div id="saveConfirmBox" style="display: none;padding:10px; background:#f8f9fa; border-radius:8px; text-align:center;">
+                        <h5 style="margin-bottom:10px;">是否同意公開您的拼貼作品？</h5>
+                        <p style="color:#6c757d; font-size:0.9rem; margin-bottom:10px;">
+                            同意公開後，您的作品將顯示在照片展示區供其他人欣賞和遊玩
+                        </p>
+                        <div style="display:flex; gap:10px; justify-content:center;">
+                            <button id="savePublicBtn" class="btn btn-success px-4">
+                                ✅ 同意公開
+                            </button>
+                            <button id="savePrivateBtn" class="btn btn-secondary px-4">
+                                🔒 不公開
+                            </button>
                         </div>
+                        <p style="color:#6c757d; font-size:0.7rem; margin-top:10px; margin-bottom:0;">
+                            無論是否公開，您都可以透過遊戲按鈕開始遊玩
+                        </p>
                     </div>
 
                     <!-- 下載區域 -->
@@ -255,7 +266,7 @@
                             <button id="screenshotBtn" class="btn btn-success btn-lg px-4" onclick="ScreenshotModule.captureAndDownload()">
                                 ⬇️ 下載
                             </button>
-                            <button id="playGameBtn" class="btn btn-primary btn-lg px-4" onclick="startGameWithCurrentCollage()" style="display: none;">
+                            <button id="playGameBtn" class="btn btn-primary btn-lg px-4" onclick="startGameWithCurrentCollage()">
                                 🎮 開始遊戲
                             </button>
                         </div>

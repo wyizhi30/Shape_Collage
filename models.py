@@ -8,12 +8,14 @@ class Collage(db.Model):                # 定義拼貼資料表
     title = db.Column(db.String(255), nullable=True)     # 作品標題
     preview_src = db.Column(db.Text)                     # 預覽圖片路徑
     info_json = db.Column(db.Text, nullable=False)       # 拼貼詳細資料（JSON）
+    is_public = db.Column(db.Boolean, default=False, nullable=False)  # ✅ 新增欄位
     created_at = db.Column(db.Float, nullable=False)     # 建立時間戳
     updated_at = db.Column(db.Float, nullable=False)     # 更新時間戳
     
     # 設置索引
     __table_args__ = (
         db.Index('idx_collages_updated_at', 'updated_at'),
+        db.Index('idx_collages_is_public', 'is_public'),  # ✅ 新增索引
     )
     
     def to_dict(self):
@@ -23,6 +25,7 @@ class Collage(db.Model):                # 定義拼貼資料表
             'timestamp': self.id,
             'title': self.title,
             'preview_src': self.preview_src,
+            'is_public': self.is_public,  # ✅ 包含在字典中
             'created_at': self.created_at,
             'updated_at': self.updated_at
         }

@@ -45,7 +45,7 @@ async function fetchGallery() {
         const frag = document.createDocumentFragment();
         
         data.items.forEach(item => {
-            // if (!item?.preview_src) return;
+            if (!item?.preview_src) return;
             
             const card = document.createElement('div');
             card.className = 'grid-item mb-4';
@@ -59,7 +59,6 @@ async function fetchGallery() {
             
             // 點擊進入遊戲
             card.addEventListener('click', () => loadCollageGame(item.id));
-            
             frag.appendChild(card);
         });
         

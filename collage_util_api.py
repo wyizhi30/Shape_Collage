@@ -254,7 +254,6 @@ def create_text_mask(canvas, text, max_fill_ratio=0.8):
     x = (width - (bbox[2] - bbox[0])) // 2 - bbox[0]
     y = (height - (bbox[3] - bbox[1])) // 2 - bbox[1]
     draw.text((x, y), text, font=font, fill=255, stroke_width=stroke_width, stroke_fill=255)
-    mask.show()
     return mask
 
 def create_silhouette_mask(canvas, path):
