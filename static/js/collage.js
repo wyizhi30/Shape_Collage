@@ -426,9 +426,27 @@ function showSaveToastOnce() {
 }
 
 async function startGameWithCurrentCollage() {
-    showSection('game');
+    // 檢查是否有生成的拼貼
+    if (!window.generatedCollage?.collage_id) {
+        alert('請先製作拼貼！');
+        return;
+    }
 
-    await loadLatestCollage();
+    // 使用遊戲模組渲染拼貼
+    if (window.GameModule?.renderCollage) {
+        window.GameModule.renderCollage(
+            window.generatedCollage, 
+            window.generatedCollage.collage_id
+        );
+    }
+    
+    // 切換到遊戲頁面
+    showSection('game');
+    
+    // 重置遊戲狀態
+    if (window.GameModule?.resetGameState) {
+        window.GameModule.resetGameState();
+    }
 }
 
 // 點擊拼貼照片放大/縮小（保持原有邏輯）
