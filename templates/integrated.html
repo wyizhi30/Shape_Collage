@@ -61,86 +61,86 @@
     <!-- 首頁介紹 Section -->
     <section id="section-home" class="content-section">
         <!-- hero 區塊 -->
-        <section class="hero mb-4" aria-labelledby="hero-title">
-        <div class="row align-items-center">
-            <div class="col-md-6 mb-4 mb-md-0">
-            <div class="ratio ratio-1x1" style="max-width:600px; margin:auto;background-color:#eac99aff;">
-                <div id="mainGalleryCarousel" class="carousel slide h-100" data-bs-ride="carousel">
-                <div class="carousel-indicators">
-                    {% for url in image_urls %}
-                    <button type="button" data-bs-target="#mainGalleryCarousel" data-bs-slide-to="{{ loop.index0 }}"
-                            {% if loop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ loop.index }}">
-                    </button>
-                    {% endfor %}
-                </div>
-                <div class="carousel-inner h-100">
-                    {% for url in image_urls %}
-                    <div class="carousel-item {% if loop.first %}active{% endif %} h-100" data-bs-interval="4000">
-                    <img src="{{ url }}" class="d-block w-100 h-100 object-fit-contain rounded" alt="拼貼圖">
+        <section class="hero mb-5" aria-labelledby="hero-title">
+            <div class="row align-items-center">
+                <div class="col-md-6 mb-4 mb-md-0">
+                <div class="ratio ratio-1x1" style="max-width:600px; margin:auto;background-color:#eac99aff;">
+                    <div id="mainGalleryCarousel" class="carousel slide h-100" data-bs-ride="carousel">
+                    <div class="carousel-indicators">
+                        {% for url in image_urls %}
+                        <button type="button" data-bs-target="#mainGalleryCarousel" data-bs-slide-to="{{ loop.index0 }}"
+                                {% if loop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ loop.index }}">
+                        </button>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
+                    <div class="carousel-inner h-100">
+                        {% for url in image_urls %}
+                        <div class="carousel-item {% if loop.first %}active{% endif %} h-100" data-bs-interval="4000">
+                        <img src="{{ url }}" class="d-block w-100 h-100 object-fit-contain rounded" alt="拼貼圖">
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#mainGalleryCarousel" data-bs-slide="prev">
+                        <span class="custom-arrow" aria-hidden="true">
+                        <svg fill="currentColor" viewBox="0 0 16 16"><path d="M10 2 L6 8 L10 14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#mainGalleryCarousel" data-bs-slide="next">
+                        <span class="custom-arrow" aria-hidden="true">
+                        <svg fill="currentColor" viewBox="0 0 16 16"><path d="M6 2 L10 8 L6 14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                    </div>
                 </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#mainGalleryCarousel" data-bs-slide="prev">
-                    <span class="custom-arrow" aria-hidden="true">
-                    <svg fill="currentColor" viewBox="0 0 16 16"><path d="M10 2 L6 8 L10 14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </span>
-                    <span class="visually-hidden">Previous</span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#mainGalleryCarousel" data-bs-slide="next">
-                    <span class="custom-arrow" aria-hidden="true">
-                    <svg fill="currentColor" viewBox="0 0 16 16"><path d="M6 2 L10 8 L6 14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </span>
-                    <span class="visually-hidden">Next</span>
-                </button>
                 </div>
-            </div>
-            </div>
 
-            <div class="col-md-6 d-flex flex-column justify-content-center align-items-center gallery-info">
-            <div class="mb-4">
-                <!-- h2 加 id 供 section aria-labelledby 使用 -->
-                <h2 id="hero-title" class="mb-3 display-5 fw-bold">拼貼 × 探索 × 創造</h2>
-                <p class="fs-5">在影像的層次之間，找尋屬於你的驚喜!</p>
+                <div class="col-md-6 d-flex flex-column justify-content-center align-items-center gallery-info">
+                <div class="mb-4">
+                    <!-- h2 加 id 供 section aria-labelledby 使用 -->
+                    <h2 id="hero-title" class="mb-3 display-5 fw-bold">拼貼 × 探索 × 創造</h2>
+                    <p class="fs-5">在影像的層次之間，找尋屬於你的驚喜!</p>
+                </div>
+                <a href="#section-collage" class="btn btn-outline-primary btn-lg px-5 py-3 mx-auto" onclick="showSection('collage', event); return false;">GO!</a>
+                </div>
             </div>
-            <a href="#section-collage" class="btn btn-outline-primary btn-lg px-5 py-3 mx-auto" onclick="showSection('collage', event); return false;">GO!</a>
-            </div>
-        </div>
         </section>
 
         <!-- 系統特色 -->
         <section class="mb-5" aria-labelledby="features-title">
-        <div class="container">
-            <h3 id="features-title" class="mb-4 text-center">系統特色</h3>
-            <div class="row text-center">
-            <div class="col-md-4 mb-4 mb-md-0">
-                <div class="p-4 border rounded shadow-sm h-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-search feature-icon" viewBox="0 0 16 16">
-                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-                    </svg>
-                    <h5 class="fw-bold mb-2">互動遊戲</h5>
-                    <p class="text-muted">快來找找自己藏在哪裡，每張小圖都藏著驚喜，玩出拼貼的樂趣！</p>
+            <div class="container" style="margin-top:20px;">
+                <h3 id="features-title" class="mb-4 text-center">系統特色</h3>
+                <div class="row text-center">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <div class="p-4 border rounded shadow-sm h-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-search feature-icon" viewBox="0 0 16 16">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                        </svg>
+                        <h5 class="fw-bold mb-2">互動遊戲</h5>
+                        <p class="text-muted">快來找找自己藏在哪裡，每張小圖都藏著驚喜，玩出拼貼的樂趣！</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <div class="p-4 border rounded shadow-sm h-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-columns-gap feature-icon" viewBox="0 0 16 16">
+                            <path d="M6 1v3H1V1zM1 0a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1V1a1 1 0 0 0-1-1zm14 12v3h-5v-3zm-5-1a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1zM6 8v7H1V8zM1 7a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1zm14-6v7h-5V1zm-5-1a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1V1a1 1 0 0 0-1-1z"/>
+                        </svg>
+                        <h5 class="fw-bold mb-2">多樣拼貼</h5>
+                        <p class="text-muted">支援多樣拼貼版型,一鍵輕鬆生成,展現你的獨特視覺風格。</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-4 border rounded shadow-sm h-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-share feature-icon" viewBox="0 0 16 16">
+                            <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5m-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3"/>
+                        </svg>
+                        <h5 class="fw-bold mb-2">分享樂趣</h5>
+                        <p class="text-muted">分享拼貼與朋友同樂,在展示區發現更多創意靈感。</p>
+                    </div>
+                </div>
                 </div>
             </div>
-            <div class="col-md-4 mb-4 mb-md-0">
-                <div class="p-4 border rounded shadow-sm h-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-columns-gap feature-icon" viewBox="0 0 16 16">
-                        <path d="M6 1v3H1V1zM1 0a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1V1a1 1 0 0 0-1-1zm14 12v3h-5v-3zm-5-1a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1zM6 8v7H1V8zM1 7a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1zm14-6v7h-5V1zm-5-1a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1V1a1 1 0 0 0-1-1z"/>
-                    </svg>
-                    <h5 class="fw-bold mb-2">多樣拼貼</h5>
-                    <p class="text-muted">支援多樣拼貼版型,一鍵輕鬆生成,展現你的獨特視覺風格。</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="p-4 border rounded shadow-sm h-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-share feature-icon" viewBox="0 0 16 16">
-                        <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5m-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3"/>
-                    </svg>
-                    <h5 class="fw-bold mb-2">分享樂趣</h5>
-                    <p class="text-muted">分享拼貼與朋友同樂,在展示區發現更多創意靈感。</p>
-                </div>
-            </div>
-            </div>
-        </div>
         </section>
 
         <!-- 操作說明 -->
@@ -223,8 +223,8 @@
                         <input type="file" name="images" multiple required class="main-input">
 
                         <!-- 自訂遮罩上傳區 -->
-                        <div id="customMaskUpload" style="display:none;">
-                            <label style="color:#23272f;">上傳自訂輪廓圖：</label>
+                        <div id="customMaskUpload" style="display:none; text-align:center;">
+                            <label style="color:#23272f;">上傳自訂輪廓圖（建議邊緣清晰，影像辨識會更準確）：</label>
                             <input type="file" name="mask_image" accept="image/*" class="main-input">
                         </div>
 
@@ -425,19 +425,19 @@
                             <div class="feedback-type-group">
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input" type="radio" name="feedbackType" id="suggestion" value="suggestion" checked>
-                                    <label class="form-check-label" for="suggestion">💡 建議</label>
+                                    <label class="form-check-label" for="suggestion">建議</label>
                                 </div>
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input" type="radio" name="feedbackType" id="bug" value="bug">
-                                    <label class="form-check-label" for="bug">🐛 問題回報</label>
+                                    <label class="form-check-label" for="bug">問題回報</label>
                                 </div>
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input" type="radio" name="feedbackType" id="feature" value="feature">
-                                    <label class="form-check-label" for="feature">✨ 功能需求</label>
+                                    <label class="form-check-label" for="feature">功能需求</label>
                                 </div>
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input" type="radio" name="feedbackType" id="other" value="other">
-                                    <label class="form-check-label" for="other">📞 其他</label>
+                                    <label class="form-check-label" for="other">其他</label>
                                 </div>
                             </div>
                         </div>
@@ -458,10 +458,10 @@
                         <!-- 送出按鈕 -->
                         <div class="text-center d-flex justify-content-center gap-3">
                             <button type="submit" class="btn btn-primary btn-lg px-md-4">
-                                📤 送出回饋
+                                送出回饋
                             </button>
                             <button type="reset" class="btn btn-outline-secondary btn-lg px-md-4">
-                                🔄 重設表單
+                                重設表單
                             </button>
                         </div>
                     </form>

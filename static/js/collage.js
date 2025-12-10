@@ -293,34 +293,54 @@ function bindSaveConfirmButtons() {
     savePrivateBtn.onclick = () => handlePublicSetting(false);
 }
 
-// ✅ 新增：顯示儲存狀態 Toast
+// ✅ 使用 Bootstrap Toast
 function showSaveStatusToast(isPublic) {
     const existing = document.querySelector('.save-status-toast');
-    if (existing) existing.remove();
+    if (existing) {
+        const bsToast = bootstrap.Toast.getInstance(existing);
+        if (bsToast) bsToast.dispose();
+        existing.remove();
+    }
     
-    const toast = document.createElement('div');
-    toast.className = isPublic ? 'alert alert-success mt-2 save-status-toast' : 'alert alert-secondary mt-2 save-status-toast';
-    toast.innerHTML = isPublic 
-        ? '✅ 作品已公開，現在會顯示在照片展示區'
-        : '🔒 作品已設為私密，不會顯示在公開展示區';
-    toast.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 9999;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        max-width: 400px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    let toastContainer = document.querySelector('.toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container position-fixed end-0 p-3';
+        toastContainer.style.top = '70px'; // navbar 下方
+        toastContainer.style.zIndex = '9999';
+        document.body.appendChild(toastContainer);
+    }
+    
+    // 創建 Toast 元素
+    const toastEl = document.createElement('div');
+    toastEl.className = `toast save-status-toast align-items-center text-white border-0 ${isPublic ? 'bg-success bg-opacity-70' : 'bg-secondary bg-opacity-80'}`;
+    toastEl.setAttribute('role', 'alert');
+    toastEl.setAttribute('aria-live', 'assertive');
+    toastEl.setAttribute('aria-atomic', 'true');
+    
+    toastEl.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                ${isPublic ? '✅ 作品已公開，現在會顯示在照片展示區' : '🔒 作品已設為私密，不會顯示在公開展示區'}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
     `;
     
-    document.body.appendChild(toast);
+    toastContainer.appendChild(toastEl);
     
-    setTimeout(() => { toast.style.opacity = '1'; }, 50);
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    // 初始化並顯示 Toast
+    const toast = new bootstrap.Toast(toastEl, {
+        autohide: true,
+        delay: 3000
+    });
+    
+    toast.show();
+    
+    // Toast 隱藏後移除元素
+    toastEl.addEventListener('hidden.bs.toast', () => {
+        toastEl.remove();
+    });
 }
 
 function displayResult(data) {
@@ -540,23 +560,52 @@ const ScreenshotModule = {
     },
 
     showSuccessMessage() {
-        const existing = document.querySelector('#downloadSection .alert-success');
-        if (existing) existing.remove();
-
-        const message = document.createElement('div');
-        message.className = 'alert alert-success mt-2';
-        message.innerHTML = '✅ 成功！已下載拼貼內容！';
-        message.style.opacity = '0';
-        message.style.transition = 'opacity 0.3s ease';
-
-        const downloadSection = document.getElementById('downloadSection');
-        downloadSection.appendChild(message);
-
-        setTimeout(() => { message.style.opacity = '1'; }, 50);
-        setTimeout(() => {
-            message.style.opacity = '0';
-            setTimeout(() => message.remove(), 300);
-        }, 2500);
+        const existing = document.querySelector('.download-success-toast');
+        if (existing) {
+            const bsToast = bootstrap.Toast.getInstance(existing);
+            if (bsToast) bsToast.dispose();
+            existing.remove();
+        }
+        
+        let toastContainer = document.querySelector('.toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed end-0 p-3';
+            toastContainer.style.top = '70px'; // navbar 下方
+            toastContainer.style.zIndex = '9999';
+            document.body.appendChild(toastContainer);
+        }
+        
+        // 創建 Toast 元素
+        const toastEl = document.createElement('div');
+        toastEl.className = 'toast download-success-toast align-items-center text-white border-0 bg-success bg-opacity-70';
+        toastEl.setAttribute('role', 'alert');
+        toastEl.setAttribute('aria-live', 'assertive');
+        toastEl.setAttribute('aria-atomic', 'true');
+        
+        toastEl.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    ✅ 成功！已下載拼貼內容！
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        `;
+        
+        toastContainer.appendChild(toastEl);
+        
+        // 初始化並顯示 Toast
+        const toast = new bootstrap.Toast(toastEl, {
+            autohide: true,
+            delay: 3000
+        });
+        
+        toast.show();
+        
+        // Toast 隱藏後移除元素
+        toastEl.addEventListener('hidden.bs.toast', () => {
+            toastEl.remove();
+        });
     }
 };
 
