@@ -28,16 +28,16 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 def ai_generate(
     image, 
-    max_images=12, 
+    max_images=10, 
     prompt="""Generate a high-resolution, ultra-realistic portrait inspired by the uploaded reference image.  
         The new person should resemble the original individual by about 30–50%, sharing the same gender and approximate age, but clearly be a different person.  
         Introduce noticeable changes in facial features, hairstyle, hair color, eye shape, nose shape, jawline, and expression to make the person look clearly different while maintaining overall familiarity.  
         Place the subject centered in the frame with a photographer’s portrait-style composition.  
         Use natural, soft lighting and realistic skin texture; avoid theatrical or artificial lighting.  
-        Generate a new background that is different in content but visually consistent with the reference image —  
-        match the general **color tone, mood, and lighting style**, while allowing creative freedom in scenery and details.  
+        Generate a new background that is different in content but visually consistent with the reference image make it interest.. —  
+        Make it almost match the general **color tone, mood, and lighting style**, while allowing creative freedom in scenery and details.  
         The background should feel harmonious with the original but not copy it.  
-        Optionally modify clothing, accessories, or angle slightly to increase distinction from the original while keeping the person recognizable.  
+        Optionally modify color of the clothing to make it random, accessories, or angle slightly to increase distinction from the original while keeping the person recognizable.  
         Do not make it a clone or identical twin — keep identity uniqueness.
         """,):
     

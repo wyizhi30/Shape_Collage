@@ -11,7 +11,6 @@ const ctx = canvas ? canvas.getContext("2d") : null;
 const previewCanvas = document.getElementById('drawPreview');
 const previewCtx = previewCanvas ? previewCanvas.getContext('2d') : null;
 const canvasBox = document.getElementById('canvas-box');
-const collageResult = document.getElementById('collageResult');
 const loadingDiv = document.getElementById('loading');
 
 // 手繪相關按鈕
@@ -205,20 +204,19 @@ function dataURLToBlob(dataURL) {
     return new Blob([u8arr], { type: mime });
 }
 
-// ✅ 表單送出（保持原有邏輯）
+// ✅ 表單送出
 document.getElementById("uploadForm")?.addEventListener("submit", function(event){
     event.preventDefault();
     const fd = new FormData(this);
     
-    // 若選手繪，加入手繪遮罩
     if(document.querySelector('input[name="shape"]:checked').value === 'draw' && canvas){
         const dataURL = canvas.toDataURL("image/png");
         const blob = dataURLToBlob(dataURL);
         fd.append("drawn_shape", blob, "drawn_shape.png");
     }
     
-    collageResult.textContent = '產生中...';
-    loadingDiv.style.display = 'flex';
+    // ✅ 顯示進度指示器
+    showProgressIndicator();
     
     fetch("/generate_collage", { method: "POST", body: fd })
         .then(res => {
@@ -232,23 +230,63 @@ document.getElementById("uploadForm")?.addEventListener("submit", function(event
         .then(data => {
             console.log('✅ 拼貼生成成功');
             
-            // 清空舊拼貼
+            hideProgressIndicator(true);
             canvasBox.innerHTML = "";
             loadingDiv.style.display = 'none';
             
             displayResult(data);
-            
-            // 自動保存到 carousel 資料夾
-            // setTimeout(() => {
-            //     saveToCarousel();
-            // }, 1000);
+            showGenerationCompleteToast();
         })
         .catch(err => {
+            hideProgressIndicator(false);
             loadingDiv.style.display = 'none';
-            collageResult.textContent = "網路異常或伺服器無回應，請稍後再試";
+            
+            // ✅ 改用 Toast 顯示錯誤
+            showErrorToast();
             console.error('Collage generation error:', err);
         });
 });
+
+
+// ✅ 新增：生成完成通知
+function showGenerationCompleteToast() {
+    let toastContainer = document.querySelector('.toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container position-fixed end-0 p-3';
+        toastContainer.style.top = '70px';
+        toastContainer.style.zIndex = '9999';
+        document.body.appendChild(toastContainer);
+    }
+    
+    const toastEl = document.createElement('div');
+    toastEl.className = 'toast align-items-center text-white border-0 bg-success bg-opacity-80';
+    toastEl.setAttribute('role', 'alert');
+    toastEl.setAttribute('aria-live', 'assertive');
+    toastEl.setAttribute('aria-atomic', 'true');
+    
+    toastEl.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                🎨 拼貼生成完成！可以回到拼貼頁面查看
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    `;
+    
+    toastContainer.appendChild(toastEl);
+    
+    const toast = new bootstrap.Toast(toastEl, {
+        autohide: true,
+        delay: 5000
+    });
+    
+    toast.show();
+    
+    toastEl.addEventListener('hidden.bs.toast', () => {
+        toastEl.remove();
+    });
+}
 
 // 綁定儲存確認按鈕事件
 function bindSaveConfirmButtons() {
@@ -349,13 +387,14 @@ function displayResult(data) {
     const saveConfirmBox = document.getElementById('saveConfirmBox');
 
     if (!data.image_info || !data.images || data.image_info.length === 0 || data.images.length === 0) {
-        collageResult.textContent = data.error || '產生失敗';
+        // ✅ 改用 Toast 顯示錯誤
+        showErrorToast(data.error || '產生失敗');
         downloadSection.style.display = 'none';
         playGameBtn.style.display = 'none';
         return;
     }
 
-    collageResult.textContent = '拼貼產生成功！';
+    // ✅ 移除成功訊息文字，交給 Toast 處理
 
     const baseSize = 600;
     canvasBox.innerHTML = "";
@@ -675,4 +714,135 @@ function saveToCarousel() {
             console.error('保存到 carousel 失敗:', error);
         });
     });
+}
+
+// ==================== 進度指示器 ====================
+
+// ✅ 顯示右下角進度指示器
+function showProgressIndicator() {
+    // 移除舊的進度指示器（如果存在）
+    const existingIndicator = document.getElementById('progressIndicator');
+    if (existingIndicator) {
+        existingIndicator.remove();
+    }
+
+    const progressDiv = document.createElement('div');
+    progressDiv.id = 'progressIndicator';
+    progressDiv.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(33, 37, 41, 0.95);
+        color: white;
+        padding: 20px 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        z-index: 1050;
+        min-width: 280px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    `;
+
+    progressDiv.innerHTML = `
+        <div style="margin-bottom: 12px;">
+            <div style="font-weight: 600; font-size: 15px; margin-bottom: 8px;">
+                🎨 正在生成拼貼
+            </div>
+            <div style="font-size: 13px; color: #adb5bd; margin-bottom: 4px;">
+                AI 圖片生成中：
+            </div>
+            <div style="font-size: 12px; color: #6c757d;">
+                預計需要 1-2 分鐘
+            </div>
+        </div>
+        <div style="background: rgba(255,255,255,0.1); height: 6px; border-radius: 3px; overflow: hidden;">
+            <div id="progressBar" style="background: linear-gradient(90deg, #0d6efd, #0dcaf0); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+        </div>
+        <div style="margin-top: 12px; font-size: 12px; color: #adb5bd; text-align: center;">
+            💡 您可以切換到其他頁面
+        </div>
+    `;
+
+    document.body.appendChild(progressDiv);
+
+    // 模擬進度更新
+    let currentProgress = 0;
+    const progressBar = document.getElementById('progressBar');
+    const progressPercent = document.getElementById('progressPercent');
+    
+    const updateInterval = 5000; // 每 5 秒更新
+    const totalTime = 120000; // 預估 120 秒 (2 分鐘)
+    const steps = totalTime / updateInterval;
+
+    const progressInterval = setInterval(() => {
+        if (currentProgress < 100) {
+            currentProgress = Math.min(currentProgress + (100 / steps), 99);
+            
+            progressBar.style.width = currentProgress + '%';
+            progressPercent.textContent = Math.floor(currentProgress);
+        }
+    }, updateInterval);
+
+    progressDiv.dataset.intervalId = progressInterval;
+}
+
+// ✅ 隱藏進度指示器
+function hideProgressIndicator(success = true) {
+    const progressDiv = document.getElementById('progressIndicator');
+    if (!progressDiv) return;
+
+    // 清除定時器
+    if (progressDiv.dataset.intervalId) {
+        clearInterval(parseInt(progressDiv.dataset.intervalId));
+    }
+
+    if (success) {
+        // 完成動畫
+        const progressBar = document.getElementById('progressBar');
+        const progressCount = document.getElementById('progressCount');
+        if (progressBar && progressCount) {
+            progressBar.style.width = '100%';
+            progressCount.textContent = '12';
+        }
+        
+        // 短暫顯示完成狀態後移除
+        setTimeout(() => {
+            progressDiv.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            progressDiv.style.opacity = '0';
+            progressDiv.style.transform = 'translateY(20px)';
+            setTimeout(() => progressDiv.remove(), 300);
+        }, 800);
+    } else {
+        // 失敗直接移除
+        progressDiv.remove();
+    }
+}
+
+// ✅ 錯誤通知
+function showErrorToast(message = '網路異常或伺服器無回應，請稍後再試') {
+    let toastContainer = document.querySelector('.toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container position-fixed end-0 p-3';
+        toastContainer.style.top = '70px';
+        toastContainer.style.zIndex = '9999';
+        document.body.appendChild(toastContainer);
+    }
+    
+    const toastEl = document.createElement('div');
+    toastEl.className = 'toast align-items-center text-white border-0 bg-danger bg-opacity-80';
+    toastEl.setAttribute('role', 'alert');
+    
+    toastEl.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">❌ ${message}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    `;
+    
+    toastContainer.appendChild(toastEl);
+    
+    const toast = new bootstrap.Toast(toastEl, { autohide: true, delay: 5000 });
+    toast.show();
+    
+    toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
 }

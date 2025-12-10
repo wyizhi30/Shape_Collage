@@ -62,47 +62,49 @@
     <section id="section-home" class="content-section">
         <!-- hero 區塊 -->
         <section class="hero mb-5" aria-labelledby="hero-title">
-            <div class="row align-items-center">
-                <div class="col-md-6 mb-4 mb-md-0">
-                <div class="ratio ratio-1x1" style="max-width:600px; margin:auto;background-color:#eac99aff;">
-                    <div id="mainGalleryCarousel" class="carousel slide h-100" data-bs-ride="carousel">
-                    <div class="carousel-indicators">
-                        {% for url in image_urls %}
-                        <button type="button" data-bs-target="#mainGalleryCarousel" data-bs-slide-to="{{ loop.index0 }}"
-                                {% if loop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ loop.index }}">
-                        </button>
-                        {% endfor %}
-                    </div>
-                    <div class="carousel-inner h-100">
-                        {% for url in image_urls %}
-                        <div class="carousel-item {% if loop.first %}active{% endif %} h-100" data-bs-interval="4000">
-                        <img src="{{ url }}" class="d-block w-100 h-100 object-fit-contain rounded" alt="拼貼圖">
+            <div class="container-fluid px-0">
+                <div class="row align-items-center g-0">
+                    <div class="col-md-6 mb-4 mb-md-0">
+                    <div class="ratio ratio-1x1" style="max-width:600px; margin:auto;background-color:#eac99aff;">
+                        <div id="mainGalleryCarousel" class="carousel slide h-100" data-bs-ride="carousel">
+                        <div class="carousel-indicators">
+                            {% for url in image_urls %}
+                            <button type="button" data-bs-target="#mainGalleryCarousel" data-bs-slide-to="{{ loop.index0 }}"
+                                    {% if loop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ loop.index }}">
+                            </button>
+                            {% endfor %}
                         </div>
-                        {% endfor %}
+                        <div class="carousel-inner h-100">
+                            {% for url in image_urls %}
+                            <div class="carousel-item {% if loop.first %}active{% endif %} h-100" data-bs-interval="4000">
+                            <img src="{{ url }}" class="d-block w-100 h-100 object-fit-contain rounded" alt="拼貼圖">
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#mainGalleryCarousel" data-bs-slide="prev">
+                            <span class="custom-arrow" aria-hidden="true">
+                            <svg fill="currentColor" viewBox="0 0 16 16"><path d="M10 2 L6 8 L10 14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#mainGalleryCarousel" data-bs-slide="next">
+                            <span class="custom-arrow" aria-hidden="true">
+                            <svg fill="currentColor" viewBox="0 0 16 16"><path d="M6 2 L10 8 L6 14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                        </div>
                     </div>
-                    <button class="carousel-control-prev" type="button" data-bs-target="#mainGalleryCarousel" data-bs-slide="prev">
-                        <span class="custom-arrow" aria-hidden="true">
-                        <svg fill="currentColor" viewBox="0 0 16 16"><path d="M10 2 L6 8 L10 14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        </span>
-                        <span class="visually-hidden">Previous</span>
-                    </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#mainGalleryCarousel" data-bs-slide="next">
-                        <span class="custom-arrow" aria-hidden="true">
-                        <svg fill="currentColor" viewBox="0 0 16 16"><path d="M6 2 L10 8 L6 14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        </span>
-                        <span class="visually-hidden">Next</span>
-                    </button>
                     </div>
-                </div>
-                </div>
 
-                <div class="col-md-6 d-flex flex-column justify-content-center align-items-center gallery-info">
-                <div class="mb-4">
-                    <!-- h2 加 id 供 section aria-labelledby 使用 -->
-                    <h2 id="hero-title" class="mb-3 display-5 fw-bold">拼貼 × 探索 × 創造</h2>
-                    <p class="fs-5">在影像的層次之間，找尋屬於你的驚喜!</p>
-                </div>
-                <a href="#section-collage" class="btn btn-outline-primary btn-lg px-5 py-3 mx-auto" onclick="showSection('collage', event); return false;">GO!</a>
+                    <div class="col-md-6 d-flex flex-column justify-content-center align-items-center gallery-info">
+                    <div class="mb-4">
+                        <!-- h2 加 id 供 section aria-labelledby 使用 -->
+                        <h2 id="hero-title" class="mb-3 display-5 fw-bold">拼貼 × 探索 × 創造</h2>
+                        <p class="fs-5">在影像的層次之間，找尋屬於你的驚喜!</p>
+                    </div>
+                    <a href="#section-collage" class="btn btn-outline-primary btn-lg px-5 py-3 mx-auto" onclick="showSection('collage', event); return false;">GO!</a>
+                    </div>
                 </div>
             </div>
         </section>
@@ -244,7 +246,6 @@
                         </div>
 
                         <button type="submit" class="main-btn" style="margin-top:10px;">產生拼貼</button>
-                        <div class="display-box" id="collageResult">等待產生...</div>
                     </form>
 
                     <!-- 下載區域 -->

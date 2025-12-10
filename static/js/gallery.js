@@ -29,7 +29,10 @@ function initMasonry(grid, gutter) {
 // 載入拼貼畫廊
 async function fetchGallery() {
     const grid = document.getElementById('grid');
-    if (!grid || grid.dataset.galleryLoaded === 'true') return;
+    if (!grid) return;
+    
+    // ✅ 移除已載入檢查，每次都重新載入
+    grid.dataset.galleryLoaded = 'false'; // 重置狀態
     
     try {
         const res = await fetch('/gallery');
@@ -39,6 +42,7 @@ async function fetchGallery() {
         
         if (!data.items?.length) {
             grid.innerHTML += '目前沒有拼貼作品';
+            grid.dataset.galleryLoaded = 'true';
             return;
         }
         
